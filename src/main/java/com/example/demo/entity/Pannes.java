@@ -40,11 +40,11 @@ public class Pannes implements Serializable{
 	
 	@ManyToOne
 	@JoinColumn(name = "idPannes")
-	private List<Techniciens> techniciens;
+	private Techniciens techniciens;
 	
 	@ManyToOne
 	@JoinColumn(name = "idOperateur")
-	private List<Operateurs> operateurs;
+	private Operateurs operateurs;
 	
 	@ManyToOne //plusieurs pannes pour une machine
 	@JoinColumn(name = "idMachine")
@@ -66,7 +66,7 @@ public class Pannes implements Serializable{
 	
 
 	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-			Date debut_inter, Date fin_inter, List<Techniciens> techniciens, List<Operateurs> operateurs,
+			Date debut_inter, Date fin_inter, Techniciens techniciens, Operateurs operateurs,
 			Machines machines, boolean etat, long numero, Outils outils) {
 		super();
 		this.idPanne = idPanne;
@@ -152,23 +152,23 @@ public class Pannes implements Serializable{
 	}
 
 
-	public List<Techniciens> getTechniciens() {
+	public Techniciens getTechniciens() {
 		return techniciens;
 	}
 
-	public void setTechniciens(List<Techniciens> techniciens) {
+	public void setTechniciens(Techniciens techniciens) {
 		this.techniciens = techniciens;
 	}
 
 
 
-	public List<Operateurs> getOperateurs() {
+	public Operateurs getOperateurs() {
 		return operateurs;
 	}
 
 
 
-	public void setOperateurs(List<Operateurs> operateurs) {
+	public void setOperateurs(Operateurs operateurs) {
 		this.operateurs = operateurs;
 	}
 

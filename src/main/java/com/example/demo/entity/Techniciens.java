@@ -25,8 +25,8 @@ public class Techniciens implements Serializable{
 	 
 	private String prenom;
 	
-	@Column(unique = true)
-	private int matricule;
+	@Column(nullable = false, unique = true, updatable = true)
+	private Long matricule;
 	
 	@OneToMany(mappedBy = "techniciens")
 	private List<Pannes> pannes;
@@ -36,13 +36,13 @@ public class Techniciens implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Techniciens(Long idTechnicien, String nom, String prenom, int matricule, List<Pannes> panne) {
+	public Techniciens(Long idTechnicien, String nom, String prenom, Long matricule, List<Pannes> pannes) {
 		super();
 		this.idTechnicien = idTechnicien;
 		this.nom = nom;
 		this.prenom = prenom;
 		this.matricule = matricule;
-		this.pannes = panne;
+		this.pannes = pannes;
 	}
 
 	public Long getIdTechnicien() {
@@ -69,20 +69,12 @@ public class Techniciens implements Serializable{
 		this.prenom = prenom;
 	}
 
-	public int getMatricule() {
+	public Long getMatricule() {
 		return matricule;
 	}
 
-	public void setMatricule(int matricule) {
+	public void setMatricule(Long matricule) {
 		this.matricule = matricule;
-	}
-
-	public List<Pannes> getPanne() {
-		return pannes;
-	}
-
-	public void setPanne(List<Pannes> panne) {
-		this.pannes = panne;
 	}
 
 	public List<Pannes> getPannes() {
@@ -91,6 +83,31 @@ public class Techniciens implements Serializable{
 
 	public void setPannes(List<Pannes> pannes) {
 		this.pannes = pannes;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((matricule == null) ? 0 : matricule.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Techniciens other = (Techniciens) obj;
+		if (matricule == null) {
+			if (other.matricule != null)
+				return false;
+		} else if (!matricule.equals(other.matricule))
+			return false;
+		return true;
 	}
 	
 	

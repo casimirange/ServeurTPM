@@ -1,10 +1,13 @@
 package com.example.demo.repository;
 
-import org.springframework.data.repository.Repository;
+
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Outils;
 
-@org.springframework.stereotype.Repository
-public interface OutilRepository extends Repository<Outils, Long> {
+@Repository
+public interface OutilRepository extends JpaRepository<Outils, Long> {
 
 }
