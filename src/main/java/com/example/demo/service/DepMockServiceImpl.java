@@ -3,15 +3,20 @@ package com.example.demo.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.boot.context.properties.source.IterableConfigurationPropertySource;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Departement;
+import com.example.demo.entity.Lignes;
 import com.example.demo.service.inter.IDepartementService;
+import com.fasterxml.jackson.databind.ser.std.IterableSerializer;
 
 @Service
 public class DepMockServiceImpl implements IDepartementService{
 
 	private List<Departement> departements;
+	
+	private Departement dep;
 	
 	public DepMockServiceImpl() {
 		departements = new ArrayList<Departement>();
@@ -41,8 +46,19 @@ public class DepMockServiceImpl implements IDepartementService{
 	@Override
 	public void deleteDep(Long id) {
 		Departement departement = new Departement();
-		departement.setId(id);;
+		departement.setIdDepartement(id);
 		departements.remove(departement);
 	}
 
+	@Override
+	public Departement findOne(Long id) {
+		
+		return dep;
+	}
+
+	/*@Override
+	public List<Lignes> allLignes(Departement departement) {
+		// TODO Auto-generated method stub
+		return null;
+	}*/
 }

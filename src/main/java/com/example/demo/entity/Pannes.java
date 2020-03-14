@@ -40,11 +40,11 @@ public class Pannes implements Serializable{
 	
 	@ManyToOne
 	@JoinColumn(name = "idPannes")
-	private Techniciens techniciens;
+	private List<Techniciens> techniciens;
 	
 	@ManyToOne
 	@JoinColumn(name = "idOperateur")
-	private Operateurs operateurs;
+	private List<Operateurs> operateurs;
 	
 	@ManyToOne //plusieurs pannes pour une machine
 	@JoinColumn(name = "idMachine")
@@ -63,9 +63,11 @@ public class Pannes implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
+	
+
 	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-			Date debut_inter, Date fin_inter, Techniciens maintenancier,
-			Operateurs operateur, Machines machine, boolean etat, long numero, Outils outil) {
+			Date debut_inter, Date fin_inter, List<Techniciens> techniciens, List<Operateurs> operateurs,
+			Machines machines, boolean etat, long numero, Outils outils) {
 		super();
 		this.idPanne = idPanne;
 		this.cause = cause;
@@ -75,13 +77,15 @@ public class Pannes implements Serializable{
 		this.heure_arret = heure_arret;
 		this.debut_inter = debut_inter;
 		this.fin_inter = fin_inter;
-		this.techniciens = maintenancier;
-		this.operateurs = operateur;
-		this.machines = machine;
+		this.techniciens = techniciens;
+		this.operateurs = operateurs;
+		this.machines = machines;
 		this.etat = etat;
 		this.numero = numero;
-		this.outils = outil;
+		this.outils = outils;
 	}
+
+
 
 	public Long getIdPanne() {
 		return idPanne;
@@ -147,21 +151,52 @@ public class Pannes implements Serializable{
 		this.fin_inter = fin_inter;
 	}
 
-	public Techniciens getMaintenancier() {
+
+	public List<Techniciens> getTechniciens() {
 		return techniciens;
 	}
 
-	public void setMaintenancier(Techniciens maintenancier) {
-		this.techniciens = maintenancier;
+	public void setTechniciens(List<Techniciens> techniciens) {
+		this.techniciens = techniciens;
 	}
 
-	public Operateurs getOperateur() {
+
+
+	public List<Operateurs> getOperateurs() {
 		return operateurs;
 	}
 
-	public void setOperateur(Operateurs operateur) {
-		this.operateurs = operateur;
+
+
+	public void setOperateurs(List<Operateurs> operateurs) {
+		this.operateurs = operateurs;
 	}
+
+
+
+	public Machines getMachines() {
+		return machines;
+	}
+
+
+
+	public void setMachines(Machines machines) {
+		this.machines = machines;
+	}
+
+
+
+	public Outils getOutils() {
+		return outils;
+	}
+
+
+
+	public void setOutils(Outils outils) {
+		this.outils = outils;
+	}
+
+
 
 	public Machines getMachine() {
 		return machines;

@@ -12,10 +12,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerator;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 
 
 @Entity
 @Table(name = "lignes")
+//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Lignes implements Serializable{
 
 	@Id
@@ -26,7 +31,7 @@ public class Lignes implements Serializable{
 	
 	@ManyToOne //plusieurs lignes pour un département
 	@JoinColumn(name = "idDepartement")
-	private Departement departement;
+	public Departement departement;
 	
 	@OneToMany(mappedBy = "lignes")
 	private List<Machines> machines;
@@ -34,6 +39,11 @@ public class Lignes implements Serializable{
 	public Lignes() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public Lignes( String nomLigne) {
+		super();
+		this.nomLigne = nomLigne;		
 	}
 
 	public Lignes(Long idLigne, String nomLigne, Departement departement, List<Machines> machines) {

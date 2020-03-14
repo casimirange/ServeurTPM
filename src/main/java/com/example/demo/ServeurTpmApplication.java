@@ -15,12 +15,12 @@ public class ServeurTpmApplication {
 		ConfigurableApplicationContext ctx = SpringApplication.run(ServeurTpmApplication.class, args);
 		
 		//initialiser la base de données
-		DepartementRepository departementRepository = ctx.getBean(DepartementRepository.class);
+		//DepartementRepository departementRepository = ctx.getBean(DepartementRepository.class);
 		
-		departementRepository.save(new Departement("Brazil", "B350", "Ivan POMPEI"));
-		departementRepository.save(new Departement("Scierie", "B450", "Victor Sa'ah"));
-		departementRepository.save(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
-		departementRepository.save(new Departement("Placage", "B300", "Bassa Amanganga"));
+		//departementRepository.save(new Departement("Brazil", "B350", "Ivan POMPEI"));
+		//departementRepository.save(new Departement("Scierie", "B450", "Victor Sa'ah"));
+		//departementRepository.save(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
+		//departementRepository.save(new Departement("Placage", "B300", "Bassa Amanganga"));
 	}
 
 }

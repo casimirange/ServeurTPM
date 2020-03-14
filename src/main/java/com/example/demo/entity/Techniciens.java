@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +25,7 @@ public class Techniciens implements Serializable{
 	 
 	private String prenom;
 	
+	@Column(unique = true)
 	private int matricule;
 	
 	@OneToMany(mappedBy = "techniciens")
@@ -81,6 +83,14 @@ public class Techniciens implements Serializable{
 
 	public void setPanne(List<Pannes> panne) {
 		this.pannes = panne;
+	}
+
+	public List<Pannes> getPannes() {
+		return pannes;
+	}
+
+	public void setPannes(List<Pannes> pannes) {
+		this.pannes = pannes;
 	}
 	
 	

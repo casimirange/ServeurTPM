@@ -29,6 +29,11 @@ public class DepartementController {
 		return depService.allDepartements();
 	}
 	
+	@GetMapping("/{id}")
+	public Departement getById(@PathVariable Long id){
+		return depService.findOne(id);
+	}
+	
 	@PostMapping
 	public void addDepartement(@RequestBody Departement departement) {
 		depService.addDepartement(departement);

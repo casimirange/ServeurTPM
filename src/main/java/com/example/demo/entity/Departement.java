@@ -10,9 +10,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 
 @Entity
 @Table(name = "departement")
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Departement implements Serializable{
 	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +30,7 @@ public class Departement implements Serializable{
 	private String responsable;
 	
 	@OneToMany(mappedBy = "departement")
-	private List<Lignes> lignes;
+	public List<Lignes> lignes;
 
 	public Departement(String nom, String centre_cout, String responsable) {
 		super();
@@ -35,17 +39,17 @@ public class Departement implements Serializable{
 		this.responsable = responsable;
 	}
 
+	public Departement(Long idDepartement, String nom, String centre_cout, String responsable, List<Lignes> lignes) {
+		super();
+		this.idDepartement = idDepartement;
+		this.nom = nom;
+		this.centre_cout = centre_cout;
+		this.responsable = responsable;
+		this.lignes = lignes;
+	}
+
 	public Departement() {
 		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public Long getId() {
-		return idDepartement;
-	}
-
-	public void setId(Long id) {
-		this.idDepartement = id;
 	}
 
 	public String getNom() {
@@ -70,6 +74,22 @@ public class Departement implements Serializable{
 
 	public void setResponsable(String responsable) {
 		this.responsable = responsable;
+	}
+
+	public Long getIdDepartement() {
+		return idDepartement;
+	}
+
+	public void setIdDepartement(Long idDepartement) {
+		this.idDepartement = idDepartement;
+	}
+
+	public List<Lignes> getLignes() {
+		return lignes;
+	}
+
+	public void setLignes(List<Lignes> lignes) {
+		this.lignes = lignes;
 	}
 
 	@Override

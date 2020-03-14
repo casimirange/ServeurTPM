@@ -7,17 +7,28 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Departement;
+import com.example.demo.entity.Lignes;
 import com.example.demo.repository.DepartementRepository;
+import com.example.demo.repository.LigneRepository;
 import com.example.demo.service.inter.IDepartementService;
 
 @Service
-@Primary  //puisque on a deux services qui implémentent la mm onterface, cett annotation stipule que ce service soit prioritaire
+@Primary  
 public class DepartementService implements IDepartementService {
 
 	
 	@Autowired
 	private DepartementRepository departementRepository;
 	
+	
+	public DepartementRepository getDepartementRepository() {
+		return departementRepository;
+	}
+
+	public void setDepartementRepository(DepartementRepository departementRepository) {
+		this.departementRepository = departementRepository;
+	}
+
 	@Override
 	public List<Departement> allDepartements() {
 		return departementRepository.findAll();
@@ -36,8 +47,14 @@ public class DepartementService implements IDepartementService {
 	@Override
 	public void deleteDep(Long id) {
 		Departement departement = new Departement();
-		departement.setId(id);
+		departement.setIdDepartement(id);
 		departementRepository.delete(departement);
+	}
+
+	@Override
+	public Departement findOne(Long id) {
+		
+		return departementRepository.findById(id).get();
 	}
 
 }
