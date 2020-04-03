@@ -46,7 +46,7 @@ public class TechniciensService implements ITechnicienService {
 	@Override
 	public void deleteTech(Long matricule) {
 		Techniciens techniciens = new Techniciens();
-		techniciens.setIdTechnicien(matricule);
+		techniciens.setMatricule(matricule);
 		technicienRepository.delete(techniciens);
 	}
 

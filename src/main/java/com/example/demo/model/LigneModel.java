@@ -6,6 +6,7 @@ public class LigneModel {
  Long idDepartement;
  String nomLigne;
  Long idLigne;
+ Departement dep;
 
 public Long getIdLigne() {
 	return idLigne;
@@ -24,6 +25,12 @@ public String getNomLigne() {
 }
 public void setNomLigne(String nomLigne) {
 	this.nomLigne = nomLigne;
+}
+public Departement getDep() {
+	return dep;
+}
+public void setDep(Departement dep) {
+	this.dep = dep;
 }
 
  

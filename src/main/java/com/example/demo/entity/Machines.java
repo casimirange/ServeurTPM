@@ -9,12 +9,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
 @Table(name = "machines")
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Machines implements Serializable{
 
 	@Id
@@ -23,14 +29,18 @@ public class Machines implements Serializable{
 	
 	private String nom;
 
-	private String matricule;
+	private String code;
 	
 	private String centre_cout;
 	
-	private String Label;
+	private String label;
+	
+	/*@Lob
+	private byte pic;*/
 	
 	@ManyToOne //plusieurs machines pour une ligne
 	@JoinColumn(name = "idLigne")
+	//@JsonIgnore
 	private Lignes lignes;
 	
 	@OneToMany(mappedBy = "machines")
@@ -53,20 +63,24 @@ public class Machines implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Machines(Long idMachine, String nom, String matricule, String centre_cout, Lignes ligne, List<Pannes> panne,
-			List<Heures> heure, List<Maintenance> maintenance, List<Arrets> arret, List<Audit> audit) {
+	public Machines(String nom, String code, String centre_cout, String label) {
 		super();
-		this.idMachine = idMachine;
 		this.nom = nom;
-		this.matricule = matricule;
+		this.code = code;
 		this.centre_cout = centre_cout;
-		this.lignes = ligne;
-		this.pannes = panne;
-		this.heures = heure;
-		this.maintenance = maintenance;
-		this.arrets = arret;
-		this.audit = audit;
+		this.label = label;
 	}
+
+	
+
+	/*public Machines(String nom, String code, String centre_cout, String label, byte pic) {
+		super();
+		this.nom = nom;
+		this.code = code;
+		this.centre_cout = centre_cout;
+		this.label = label;
+		this.pic = pic;
+	}*/
 
 	public Long getIdMachine() {
 		return idMachine;
@@ -84,12 +98,12 @@ public class Machines implements Serializable{
 		this.nom = nom;
 	}
 
-	public String getMatricule() {
-		return matricule;
+	public String getCode() {
+		return code;
 	}
 
-	public void setMatricule(String matricule) {
-		this.matricule = matricule;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getCentre_cout() {
@@ -98,31 +112,7 @@ public class Machines implements Serializable{
 
 	public void setCentre_cout(String centre_cout) {
 		this.centre_cout = centre_cout;
-	}
-
-	public Lignes getLigne() {
-		return lignes;
-	}
-
-	public void setLigne(Lignes ligne) {
-		this.lignes = ligne;
-	}
-
-	public List<Pannes> getPanne() {
-		return pannes;
-	}
-
-	public void setPanne(List<Pannes> panne) {
-		this.pannes = panne;
-	}
-
-	public List<Heures> getHeure() {
-		return heures;
-	}
-
-	public void setHeure(List<Heures> heure) {
-		this.heures = heure;
-	}
+	}	
 
 	public List<Maintenance> getMaintenance() {
 		return maintenance;
@@ -130,14 +120,6 @@ public class Machines implements Serializable{
 
 	public void setMaintenance(List<Maintenance> maintenance) {
 		this.maintenance = maintenance;
-	}
-
-	public List<Arrets> getArret() {
-		return arrets;
-	}
-
-	public void setArret(List<Arrets> arret) {
-		this.arrets = arret;
 	}
 
 	public List<Audit> getAudit() {
@@ -149,11 +131,11 @@ public class Machines implements Serializable{
 	}
 
 	public String getLabel() {
-		return Label;
+		return label;
 	}
 
 	public void setLabel(String label) {
-		Label = label;
+		label = label;
 	}
 
 	public Lignes getLignes() {
@@ -186,6 +168,40 @@ public class Machines implements Serializable{
 
 	public void setArrets(List<Arrets> arrets) {
 		this.arrets = arrets;
+	}
+	
+
+	/*public byte getPic() {
+		return pic;
+	}
+
+	public void setPic(byte pic) {
+		this.pic = pic;
+	}*/
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((idMachine == null) ? 0 : idMachine.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Machines other = (Machines) obj;
+		if (idMachine == null) {
+			if (other.idMachine != null)
+				return false;
+		} else if (!idMachine.equals(other.idMachine))
+			return false;
+		return true;
 	}
 	
 	

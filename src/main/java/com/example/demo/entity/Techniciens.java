@@ -13,19 +13,22 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.validator.constraints.UniqueElements;
+
 @Entity
 @Table(name = "techniciens")
 public class Techniciens implements Serializable{
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)	
 	private Long idTechnicien;
 	
 	private String nom;
 	 
 	private String prenom;
 	
-	@Column(nullable = false, unique = true, updatable = true)
+	private String fonction;
+	
 	private Long matricule;
 	
 	@OneToMany(mappedBy = "techniciens")
@@ -36,11 +39,21 @@ public class Techniciens implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Techniciens(Long idTechnicien, String nom, String prenom, Long matricule, List<Pannes> pannes) {
+	public Techniciens(String nom, String prenom, String fonction, Long matricule) {
 		super();
-		this.idTechnicien = idTechnicien;
+		//this.idTechnicien = idTechnicien;
 		this.nom = nom;
 		this.prenom = prenom;
+		this.fonction = fonction;
+		this.matricule = matricule;
+	}
+
+	public Techniciens(String nom, String prenom, String fonction, Long matricule, List<Pannes> pannes) {
+		super();
+		//this.idTechnicien = idTechnicien;
+		this.nom = nom;
+		this.prenom = prenom;
+		this.fonction = fonction;
 		this.matricule = matricule;
 		this.pannes = pannes;
 	}
@@ -83,6 +96,14 @@ public class Techniciens implements Serializable{
 
 	public void setPannes(List<Pannes> pannes) {
 		this.pannes = pannes;
+	}
+
+	public String getFonction() {
+		return fonction;
+	}
+
+	public void setFonction(String fonction) {
+		this.fonction = fonction;
 	}
 
 	@Override

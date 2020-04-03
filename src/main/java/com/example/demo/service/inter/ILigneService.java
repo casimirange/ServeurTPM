@@ -9,7 +9,7 @@ import com.example.demo.entity.Lignes;
 @Component
 public interface ILigneService {
 
-	List<Lignes> allLignes();
+	//List<Lignes> allLignes();
 	
 	public Lignes findBy(Long id);
 	
@@ -18,5 +18,7 @@ public interface ILigneService {
 	void updateLigne(Lignes ligne,Long id_dep);
 	
 	void deleteLigne(Long id);
+	
+	public List<Lignes> getAllLignes();
 	
 }

@@ -32,8 +32,8 @@ public class Arrets implements Serializable{
 	
 	private java.sql.Date date;
 	
-	@OneToMany(mappedBy = "arrets", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Operateurs> operateurs;
+	/*@OneToMany(mappedBy = "arrets", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Operateurs> operateurs;*/
 	
 	private Date debut_arret; 
 	
@@ -46,13 +46,11 @@ public class Arrets implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Arrets(Long idArret, Machines machine, java.sql.Date date, List<Operateurs> operateur, Date debut_arret,
-			Date fin_arret, String cause) {
+	public Arrets(Long idArret, Machines machine, java.sql.Date date, Date debut_arret, Date fin_arret, String cause) {
 		super();
 		this.idArret = idArret;
 		this.machines = machine;
 		this.date = date;
-		this.operateurs = operateur;
 		this.debut_arret = debut_arret;
 		this.fin_arret = fin_arret;
 		this.cause = cause;
@@ -82,13 +80,7 @@ public class Arrets implements Serializable{
 		this.date = date;
 	}
 
-	public List<Operateurs> getOperateur() {
-		return operateurs;
-	}
-
-	public void setOperateur(List<Operateurs> operateur) {
-		this.operateurs = operateur;
-	}
+	
 
 	public Date getDebut_arret() {
 		return debut_arret;

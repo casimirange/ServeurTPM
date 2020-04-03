@@ -26,8 +26,8 @@ public class Outils implements Serializable{
 	
 	private String ref;
 	
-	@OneToMany(mappedBy = "outils")
-	private List<Pannes> pannes;
+	/*@OneToMany(mappedBy = "outils")
+	private List<Pannes> pannes;*/
 
 	public Outils() {
 		super();
@@ -40,7 +40,7 @@ public class Outils implements Serializable{
 		this.qte = qte;
 		this.nom = nom;
 		this.ref = ref;
-		this.pannes = panne;
+		//this.pannes = panne;
 	}
 
 	public Long getIdOutil() {
@@ -75,12 +75,12 @@ public class Outils implements Serializable{
 		this.ref = ref;
 	}
 
-	public List<Pannes> getPanne() {
+	/*public List<Pannes> getPanne() {
 		return pannes;
 	}
 
 	public void setPanne(List<Pannes> panne) {
 		this.pannes = panne;
-	}
+	}*/
 
 }

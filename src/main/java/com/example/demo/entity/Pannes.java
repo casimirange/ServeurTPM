@@ -16,8 +16,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.soap.Text;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
 @Table(name = "pannes")
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Pannes implements Serializable{
 	
 	@Id
@@ -39,35 +44,51 @@ public class Pannes implements Serializable{
 	private Date fin_inter;
 	
 	@ManyToOne
-	@JoinColumn(name = "idPannes")
+	@JoinColumn(name = "idTechnicien")
+	@JsonIgnore
 	private Techniciens techniciens;
 	
 	@ManyToOne
 	@JoinColumn(name = "idOperateur")
+	@JsonIgnore
 	private Operateurs operateurs;
 	
 	@ManyToOne //plusieurs pannes pour une machine
 	@JoinColumn(name = "idMachine")
+	@JsonIgnore
 	private Machines machines;
 	
-	private boolean etat;
+	private boolean etat = true;
 	
-	private long numero;
+	private int numero;
 	
-	@ManyToOne //plusieurs pannes pour une machine
+	/*@ManyToOne //plusieurs pannes pour une machine
 	@JoinColumn(name = "idOutil", nullable = true)
-	private Outils outils;
+	private Outils outils;*/
 
 	public Pannes() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	
+
+	public Pannes(String cause, String détails, String description, java.sql.Date date, Date heure_arret,
+			Date debut_inter, Date fin_inter, boolean etat, int numero) {
+		super();
+		this.cause = cause;
+		this.détails = détails;
+		this.description = description;
+		this.date = date;
+		this.heure_arret = heure_arret;
+		this.debut_inter = debut_inter;
+		this.fin_inter = fin_inter;
+		this.etat = etat;
+		this.numero = numero;
+	}
 
 	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
 			Date debut_inter, Date fin_inter, Techniciens techniciens, Operateurs operateurs,
-			Machines machines, boolean etat, long numero, Outils outils) {
+			Machines machines, boolean etat, int numero, Outils outils) {
 		super();
 		this.idPanne = idPanne;
 		this.cause = cause;
@@ -82,7 +103,7 @@ public class Pannes implements Serializable{
 		this.machines = machines;
 		this.etat = etat;
 		this.numero = numero;
-		this.outils = outils;
+		//this.outils = outils;
 	}
 
 
@@ -118,14 +139,17 @@ public class Pannes implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
 
 	public java.sql.Date getDate() {
 		return date;
 	}
 
+
 	public void setDate(java.sql.Date date) {
 		this.date = date;
 	}
+
 
 	public Date getHeure_arret() {
 		return heure_arret;
@@ -186,7 +210,7 @@ public class Pannes implements Serializable{
 
 
 
-	public Outils getOutils() {
+	/*public Outils getOutils() {
 		return outils;
 	}
 
@@ -194,17 +218,7 @@ public class Pannes implements Serializable{
 
 	public void setOutils(Outils outils) {
 		this.outils = outils;
-	}
-
-
-
-	public Machines getMachine() {
-		return machines;
-	}
-
-	public void setMachine(Machines machine) {
-		this.machines = machine;
-	}
+	}*/
 
 	public boolean isEtat() {
 		return etat;
@@ -214,20 +228,12 @@ public class Pannes implements Serializable{
 		this.etat = etat;
 	}
 
-	public long getNumero() {
+	public int getNumero() {
 		return numero;
 	}
 
-	public void setNumero(long numero) {
+	public void setNumero(int numero) {
 		this.numero = numero;
-	}
-
-	public Outils getPiece() {
-		return outils;
-	}
-
-	public void setPiece(Outils outil) {
-		this.outils = outil;
 	}
 	
 	

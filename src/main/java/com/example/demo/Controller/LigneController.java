@@ -27,9 +27,9 @@ public class LigneController {
 	@Autowired
 	private ILigneService ligneService;
 	
-	@GetMapping
+	@GetMapping("/all")
 	public List<Lignes> getLignes(){
-		return ligneService.allLignes();
+		return ligneService.getAllLignes();
 	}
 	
 	@GetMapping("/{id}")

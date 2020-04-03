@@ -20,10 +20,10 @@ public class LigneService implements ILigneService {
     @Autowired
     DepartementRepository departementRepository;
     
-	@Override
+	/*@Override
 	public List<Lignes> allLignes() {
 		return ligneRepository.findAll();
-	}
+	}*/
 
 	@Override
 	public void addLigne(Lignes ligne,Long id_dep) {
@@ -49,6 +49,14 @@ public class LigneService implements ILigneService {
 		Departement dep = departementRepository.getOne(id_dep);
 		ligne.setDepartement(dep);
 		ligneRepository.save(ligne);
+	}
+
+	@Override
+	public List<Lignes> getAllLignes() {
+		
+		List<Lignes> lgn = ligneRepository.ToutesLesLignes();
+		
+		return lgn;
 	}
 
 }
