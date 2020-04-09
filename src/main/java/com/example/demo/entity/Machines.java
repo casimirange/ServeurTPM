@@ -29,6 +29,7 @@ public class Machines implements Serializable{
 	
 	private String nom;
 
+	@Column(unique = true)
 	private String code;
 	
 	private String centre_cout;

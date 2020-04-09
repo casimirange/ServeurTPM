@@ -29,6 +29,7 @@ public class Techniciens implements Serializable{
 	
 	private String fonction;
 	
+	@Column(unique = true)
 	private Long matricule;
 	
 	@OneToMany(mappedBy = "techniciens")

@@ -8,4 +8,10 @@ import com.example.demo.entity.Utilisateurs;
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateurs, Long> {
 
+	
+	//pour définir les méthodes
+	
+	Utilisateurs findByUsername(String username);
+	
+	Utilisateurs findByMatricule(int matricule);
 }

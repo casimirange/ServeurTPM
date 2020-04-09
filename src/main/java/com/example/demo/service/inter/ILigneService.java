@@ -18,7 +18,7 @@ public interface ILigneService {
 	void updateLigne(Lignes ligne,Long id_dep);
 	
 	void deleteLigne(Long id);
-	
+	 
 	public List<Lignes> getAllLignes();
 	
 }

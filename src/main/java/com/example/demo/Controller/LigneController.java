@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Lignes;
 import com.example.demo.model.LigneModel;
+import com.example.demo.repository.LigneRepository;
 import com.example.demo.service.inter.ILigneService;
 
 @RestController 
@@ -27,10 +28,13 @@ public class LigneController {
 	@Autowired
 	private ILigneService ligneService;
 	
-	@GetMapping("/all")
-	public List<Lignes> getLignes(){
-		return ligneService.getAllLignes();
-	}
+	/*@Autowired
+	private LigneRepository ligneRepository;*/
+	
+	//@GetMapping("/all")
+	//public Lignes getLignes(){
+		//return ligneService.getAllLignes();
+	//}
 	
 	@GetMapping("/{id}")
 	public Lignes getById(@PathVariable Long id){

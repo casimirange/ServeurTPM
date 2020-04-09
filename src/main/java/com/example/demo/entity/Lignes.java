@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,7 +37,7 @@ public class Lignes implements Serializable{
 	
 	private String nomLigne;
 	
-	@ManyToOne //plusieurs lignes pour un département
+	@ManyToOne(fetch = FetchType.EAGER) //plusieurs lignes pour un département
 	@JoinColumn(name = "idDepartement")
 	//@JsonIgnore
 	public Departement departement;

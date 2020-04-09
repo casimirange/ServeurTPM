@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,6 +29,7 @@ public class Operateurs implements Serializable{
 	 
 	private String prenom;
 
+	@Column(unique = true)
 	private Long matricule;
 	
 	@OneToMany(mappedBy = "operateurs")

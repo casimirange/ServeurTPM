@@ -1,12 +1,18 @@
 package com.example.demo;
 
+import java.util.Arrays;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.example.demo.entity.Departement;
+import com.example.demo.entity.Role;
+import com.example.demo.entity.Utilisateurs;
 import com.example.demo.repository.DepartementRepository;
+import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.UtilisateurRepository;
 
 @SpringBootApplication
 public class ServeurTpmApplication {
@@ -21,6 +27,30 @@ public class ServeurTpmApplication {
 		//departementRepository.save(new Departement("Scierie", "B450", "Victor Sa'ah"));
 		//departementRepository.save(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
 		//departementRepository.save(new Departement("Placage", "B300", "Bassa Amanganga"));
+		
+		RoleRepository roleRepository = ctx.getBean(RoleRepository.class);
+		
+		Role roleUser = new Role("ROLE_USER");
+		Role roleAdmin = new Role("ROLE_ADMIN");
+		Role roleSuperAdmin = new Role("ROLE_SUPER_ADMIN");
+		
+		roleRepository.save(roleUser);
+		roleRepository.save(roleAdmin);
+		roleRepository.save(roleSuperAdmin);
+		
+		UtilisateurRepository utilisateurRepository = ctx.getBean(UtilisateurRepository.class);
+		Utilisateurs user = new Utilisateurs("Casimir", "Ange", 4688, "casimir.ouandji@alpiwood.com", "4688", true);
+		user.setRole(Arrays.asList(roleSuperAdmin, roleAdmin, roleUser));
+		utilisateurRepository.save(user);
+		
+		Utilisateurs user2 = new Utilisateurs("Bellino", "Stefano", 3156, "stefano.bellino@alpiwood.com", "3156", true);
+		user2.setRole(Arrays.asList(roleAdmin, roleUser));
+		utilisateurRepository.save(user2);
+		
+		Utilisateurs user3 = new Utilisateurs("Atonlikeu", "Debras", 4057, "debras.atonlikeu@alpiwood.com", "4057", true);
+		user3.setRole(Arrays.asList(roleUser));
+		utilisateurRepository.save(user3);
+		
 	}
 
 }
