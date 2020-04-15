@@ -27,7 +27,9 @@ public class Techniciens implements Serializable{
 	 
 	private String prenom;
 	
-	private String fonction;
+	private String fonction;    
+        	
+	private boolean etat;
 	
 	@Column(unique = true)
 	private Long matricule;
@@ -40,13 +42,13 @@ public class Techniciens implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Techniciens(String nom, String prenom, String fonction, Long matricule) {
+	public Techniciens(String nom, String prenom, String fonction, Long matricule, boolean etat) {
 		super();
-		//this.idTechnicien = idTechnicien;
 		this.nom = nom;
 		this.prenom = prenom;
 		this.fonction = fonction;
 		this.matricule = matricule;
+                this.etat = etat;
 	}
 
 	public Techniciens(String nom, String prenom, String fonction, Long matricule, List<Pannes> pannes) {
@@ -106,6 +108,14 @@ public class Techniciens implements Serializable{
 	public void setFonction(String fonction) {
 		this.fonction = fonction;
 	}
+
+        public boolean isEtat() {
+            return etat;
+        }
+
+        public void setEtat(boolean etat) {
+            this.etat = etat;
+        }
 
 	@Override
 	public int hashCode() {

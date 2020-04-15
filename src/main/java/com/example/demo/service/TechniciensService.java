@@ -44,10 +44,36 @@ public class TechniciensService implements ITechnicienService {
 	}
 
 	@Override
-	public void deleteTech(Long matricule) {
+	public void deleteTech(Long id) {
 		Techniciens techniciens = new Techniciens();
-		techniciens.setMatricule(matricule);
+		techniciens.setIdTechnicien(id);
 		technicienRepository.delete(techniciens);
+	}
+
+        @Override
+        public void activerTech(Long matricule) {
+            Techniciens tech = new Techniciens();
+            tech = technicienRepository.findByMatricule(matricule);
+            if(tech.isEtat()){
+                tech.setEtat(false);
+            }else{
+                tech.setEtat(true);
+            }
+            technicienRepository.save(tech);
+        }
+
+        @Override
+        public Techniciens findByMat(Long matricule) {
+            return technicienRepository.findByMatricule(matricule);
+        }
+    
+        @Override
+        public List<Techniciens> allDesactiveTech() {
+		return technicienRepository.DesactivatedTech();
+	}
+        
+        public List<Techniciens> allActiveTech() {
+		return technicienRepository.ActivatedTech();
 	}
 
 }

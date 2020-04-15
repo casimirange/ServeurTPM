@@ -41,7 +41,8 @@ public class Machines implements Serializable{
 	
 	@ManyToOne //plusieurs machines pour une ligne
 	@JoinColumn(name = "idLigne")
-	//@JsonIgnore
+	
+        @JsonIgnore
 	private Lignes lignes;
 	
 	@OneToMany(mappedBy = "machines")

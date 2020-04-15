@@ -43,17 +43,17 @@ public class MachineController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Machines> creationMachine(@RequestBody MachineModel machineModel) {
+	public void creationMachine(@RequestBody MachineModel machineModel) {
 		Machines machine = new Machines(machineModel.getNom(), machineModel.getCode(), machineModel.getCentreCout(), machineModel.getLabel());
 		machineService.addMachine(machine, machineModel.getIdLigne());
-		return new ResponseEntity<>(machine,HttpStatus.CREATED);
+		//return new ResponseEntity<>("machine créée",HttpStatus.CREATED);
 	}
 	
 	@PutMapping
-	public ResponseEntity<Machines> updateMachine(@RequestBody MachineModel machineModel) {
+	public void updateMachine(@RequestBody MachineModel machineModel) {
 		Machines machine = new Machines(machineModel.getNom(), machineModel.getCode(), machineModel.getCentreCout(), machineModel.getLabel());
 		machineService.updateMachine(machine, machineModel.getIdLigne());
-		return new ResponseEntity<>(machine,HttpStatus.ACCEPTED);
+		//return new ResponseEntity<>("machine modifiée",HttpStatus.ACCEPTED);
 	}
 	
 	@DeleteMapping("/{code}")

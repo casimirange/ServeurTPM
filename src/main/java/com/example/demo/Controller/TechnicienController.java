@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Techniciens;
+import com.example.demo.repository.TechnicienRepository;
 import com.example.demo.service.inter.ITechnicienService;
 
 @RestController 
@@ -23,19 +24,33 @@ public class TechnicienController {
 	
 	@Autowired
 	private ITechnicienService techService;
+        
+        @Autowired
+        private TechnicienRepository technicienRepository;
 	
 	@GetMapping
 	public List<Techniciens> getTechniciens(){
 		return techService.allTechniciens();
 	}
+        
+        @GetMapping("/active")
+	public List<Techniciens> activeTech(){
+		return techService.allActiveTech();
+	}
+        
+        @GetMapping("/desactive")
+	public List<Techniciens> desactiveTech(){
+		return techService.allDesactiveTech();
+	}
 	
-	@GetMapping("/{id}")
-	public Techniciens getById(@PathVariable Long id){
-		return techService.findOne(id);
+	@GetMapping("/{matricule}")
+	public Techniciens getById(@PathVariable Long matricule){
+		return techService.findByMat(matricule);
 	}
 	
 	@PostMapping
 	public void addTechnicien(@RequestBody Techniciens technicien) {
+            technicien.setEtat(true);
 		techService.addTechnicien(technicien);
 	}
 	
@@ -49,5 +64,16 @@ public class TechnicienController {
 		techService.deleteTech(matricule);
 	}
 	
+        @PutMapping("/{matricule}")
+	public void desactiveTechnicien(@PathVariable Long matricule) {
+	    Techniciens tech = new Techniciens();
+        tech = techService.findByMat(matricule);
+        if(tech.isEtat()){
+            tech.setEtat(false);
+        }else{
+            tech.setEtat(true);
+        }
+            techService.updateTech(tech);
+	}
 
 }

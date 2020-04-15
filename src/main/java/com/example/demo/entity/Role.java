@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.example.demo.util.RoleEnum;
+
 @Entity
 @Table(name = "role")
 public class Role {
@@ -24,9 +26,9 @@ public class Role {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Role(String nom) {
+	public Role(RoleEnum role) {
 		super();
-		this.nom = nom;
+		this.nom = role.getName();
 	}
 
 	public Long getId() {

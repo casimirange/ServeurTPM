@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+
 @Entity
 @Table(name = "users")
 public class Utilisateurs implements Serializable{
@@ -34,6 +35,8 @@ public class Utilisateurs implements Serializable{
 	private String username;
 	
 	private String password;
+        
+        private String fonction;
 	
 	private boolean enable;
 	
@@ -48,13 +51,14 @@ public class Utilisateurs implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Utilisateurs(String nom, String prenom, int matricule, String username, String password, boolean enable) {
+	public Utilisateurs(String nom, String prenom, int matricule, String username, String password, String fonction, boolean enable) {
 		super();
 		this.nom = nom;
 		this.prenom = prenom;
 		this.matricule = matricule;
 		this.username = username;
 		this.password = password;
+                this.fonction = fonction;
 		this.enable = enable;
 	}
 
@@ -104,6 +108,14 @@ public class Utilisateurs implements Serializable{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+        
+        public String getFonction() {
+		return fonction;
+	}
+
+	public void setFonction(String fonction) {
+		this.fonction = fonction;
 	}
 
 	public boolean isEnable() {

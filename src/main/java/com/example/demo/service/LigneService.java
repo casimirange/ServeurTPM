@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Departement;
 import com.example.demo.entity.Lignes;
+import com.example.demo.reponses.LignesReponse;
 import com.example.demo.repository.DepartementRepository;
 import com.example.demo.repository.LigneRepository;
 import com.example.demo.service.inter.ILigneService;
@@ -17,13 +18,30 @@ public class LigneService implements ILigneService {
 	
 	@Autowired
 	private LigneRepository ligneRepository;
-    @Autowired
-    DepartementRepository departementRepository;
+        
+        @Autowired
+        private DepartementRepository departementRepository;
     
-	/*@Override
-	public List<Lignes> allLignes() {
-		return ligneRepository.findAll();
-	}*/
+	public LigneRepository getLigneRepository() {
+		return ligneRepository;
+	}
+
+	public void setLigneRepository(LigneRepository ligneRepository) {
+		this.ligneRepository = ligneRepository;
+	}
+
+	public DepartementRepository getDepartementRepository() {
+		return departementRepository;
+	}
+
+	public void setDepartementRepository(DepartementRepository departementRepository) {
+		this.departementRepository = departementRepository;
+	}
+
+	@Override
+	public List<LignesReponse> allLignes() {
+		return ligneRepository.ToutesLesLignes();
+	}
 
 	@Override
 	public void addLigne(Lignes ligne,Long id_dep) {
@@ -54,7 +72,7 @@ public class LigneService implements ILigneService {
 	@Override
 	public List<Lignes> getAllLignes() {
 		
-		List<Lignes> lgn = ligneRepository.ToutesLesLignes();
+		List<Lignes> lgn = ligneRepository.findAll();
 		
 		return lgn;
 	}

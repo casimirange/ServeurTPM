@@ -7,16 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Lignes;
+import com.example.demo.reponses.LignesReponse;
 
 
 
 @Repository
 public interface LigneRepository extends JpaRepository<Lignes, Long> {
 	
-	String quer = "SELECT * from lignes as l INNER JOIN departement as d on l.id_departement = d.id_departement";
+	//String quer = "SELECT new com.example.demo.reponses.LignesReponse(nom) FROM lignes as l INNER JOIN departement as d on l.idDepartement = d.idDepartement";
 	
-	String quer1 = "SELECT * from lignes";
+	String quer1 = "SELECT new com.example.demo.reponses.LignesReponse(l.nomLigne , d.nom) FROM Departement d JOIN d.lignes l";
   
-	@Query( nativeQuery = true, value=quer)
-	List<Lignes> ToutesLesLignes();
+        //String quer2 = "SELECT new LignesReponse(nomLigne) FROM lignes";
+	@Query( value=quer1)
+	public List<LignesReponse> ToutesLesLignes();
 }

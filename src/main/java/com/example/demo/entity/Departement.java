@@ -11,12 +11,21 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import javax.persistence.CascadeType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "departement")
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
+//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Departement implements Serializable{
 	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,16 +38,17 @@ public class Departement implements Serializable{
 	
 	private String responsable;
 	
-	@OneToMany(mappedBy = "departement")
+	@OneToMany(mappedBy = "departement", cascade = CascadeType.ALL)
 	public List<Lignes> lignes;
 
-	public Departement(String nom, String centre_cout, String responsable) {
+	/*public Departement(String nom, String centre_cout, String responsable) {
 		super();
 		this.nom = nom;
 		this.centre_cout = centre_cout;
 		this.responsable = responsable;
 	}
 
+        
 	public Departement(Long idDepartement, String nom, String centre_cout, String responsable, List<Lignes> lignes) {
 		super();
 		this.idDepartement = idDepartement;
@@ -50,7 +60,7 @@ public class Departement implements Serializable{
 
 	public Departement() {
 		super();
-	}
+	}*/
 
 	public String getNom() {
 		return nom;
@@ -84,6 +94,7 @@ public class Departement implements Serializable{
 		this.idDepartement = idDepartement;
 	}
 
+	@JsonManagedReference
 	public List<Lignes> getLignes() {
 		return lignes;
 	}

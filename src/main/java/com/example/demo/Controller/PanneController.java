@@ -21,6 +21,8 @@ import com.example.demo.entity.Lignes;
 import com.example.demo.entity.Pannes;
 import com.example.demo.model.LigneModel;
 import com.example.demo.model.PanneModel;
+import com.example.demo.reponses.LignesReponse;
+import com.example.demo.reponses.PannesReponse;
 import com.example.demo.service.inter.IPanneService;
 
 @RestController 
@@ -34,6 +36,11 @@ public class PanneController {
 	@GetMapping
 	public List<Pannes> getPannes(){
 		return panneService.allPannes();
+	}
+        
+        @GetMapping("/all")
+	public List<PannesReponse> ToutesLesPannes(){
+		return panneService.toutesPannes();
 	}
 	
 	@PostMapping

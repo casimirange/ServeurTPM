@@ -21,10 +21,10 @@ public class DepMockServiceImpl implements IDepartementService{
 	public DepMockServiceImpl() {
 		departements = new ArrayList<Departement>();
 		
-		departements.add(new Departement("Brazil", "B350", "Ivan POMPEI"));
+		/*departements.add(new Departement("Brazil", "B350", "Ivan POMPEI"));
 		departements.add(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
 		departements.add(new Departement("Placage", "B300", "Bassa Amanganga"));
-		departements.add(new Departement("Scierie", "B450", "Victor Sa'ah"));
+		departements.add(new Departement("Scierie", "B450", "Victor Sa'ah"));*/
 	}
 	
 	@Override

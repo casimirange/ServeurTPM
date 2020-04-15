@@ -13,6 +13,7 @@ import com.example.demo.entity.Operateurs;
 import com.example.demo.entity.Outils;
 import com.example.demo.entity.Pannes;
 import com.example.demo.entity.Techniciens;
+import com.example.demo.reponses.PannesReponse;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.OperateurRepository;
 import com.example.demo.repository.OutilRepository;
@@ -43,6 +44,11 @@ public class PannesService implements IPanneService {
 	@Override
 	public List<Pannes> allPannes() {
 		return panneRepository.findAll();
+	}
+        
+	@Override
+	public List<PannesReponse> toutesPannes() {
+		return panneRepository.ToutesLesPannes();
 	}
 
 	@Override

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.example.demo.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
+//import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -26,7 +21,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     	    .httpBasic()
     	    .and()
     	    .authorizeRequests()
-    	    .antMatchers("/api/**").hasRole("USER").antMatchers("/**").hasRole("ADMIN").and()
+    	    .antMatchers("/api/**").hasRole("USER")
+    	    .antMatchers("/**").hasRole("ADMIN")
+    	    .antMatchers("**/**").hasRole("SUPER_ADMMIN").and()
     	    .csrf().disable().headers().frameOptions().disable();
     	
     }

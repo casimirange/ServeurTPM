@@ -13,22 +13,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "lignes")
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
+//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Lignes implements Serializable{
 
 	@Id
@@ -45,23 +43,24 @@ public class Lignes implements Serializable{
 	@OneToMany(mappedBy = "lignes")
 	private List<Machines> machines;
 
-	public Lignes() {
+	/*public Lignes() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
+	}*/
 
 	public Lignes( String nomLigne) {
 		super();
 		this.nomLigne = nomLigne;		
 	}
 
+        /*
 	public Lignes(Long idLigne, String nomLigne, Departement departement, List<Machines> machines) {
 		super();
 		this.idLigne = idLigne;
 		this.nomLigne = nomLigne;
 		this.departement = departement;
 		this.machines = machines;
-	}
+	}*/
 
 	public Long getIdLigne() {
 		return idLigne;
@@ -79,6 +78,7 @@ public class Lignes implements Serializable{
 		this.nomLigne = nomLigne;
 	}
 
+	@JsonBackReference
 	public Departement getDepartement() {
 		return departement;
 	}
