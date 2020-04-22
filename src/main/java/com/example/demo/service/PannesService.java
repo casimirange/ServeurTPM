@@ -14,6 +14,7 @@ import com.example.demo.entity.Outils;
 import com.example.demo.entity.Pannes;
 import com.example.demo.entity.Techniciens;
 import com.example.demo.reponses.PannesReponse;
+import com.example.demo.reponses.PannesTechReponse;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.OperateurRepository;
 import com.example.demo.repository.OutilRepository;
@@ -49,6 +50,12 @@ public class PannesService implements IPanneService {
 	@Override
 	public List<PannesReponse> toutesPannes() {
 		return panneRepository.ToutesLesPannes();
+	}      
+        
+        
+	
+	public List<PannesTechReponse> FindByNum(int numero) {
+		return panneRepository.Techs(numero);
 	}
 
 	@Override
@@ -67,10 +74,10 @@ public class PannesService implements IPanneService {
 		panne.setOperateurs(oper);
 		panne.setTechniciens(tech);
 		
-		Random rand = new Random();
-		int upperbound = 1000000;
+//		Random rand = new Random();
+//		int upperbound = 1000000;
 		
-		panne.setNumero(rand.nextInt(upperbound));	
+//		panne.setNumero(rand.nextInt(upperbound));	
 		panneRepository.save(panne);
 		
 	}	
@@ -115,10 +122,10 @@ public class PannesService implements IPanneService {
 		panne.setOperateurs(oper);
 		panne.setTechniciens(tech);
 		
-		Random rand = new Random();
-		int upperbound = 1000000;
+//		Random rand = new Random();
+//		int upperbound = 1000000;
 		
-		panne.setNumero(rand.nextInt(upperbound));	
+//		panne.setNumero(rand.nextInt(upperbound));	
 		panneRepository.save(panne);
 	}
 

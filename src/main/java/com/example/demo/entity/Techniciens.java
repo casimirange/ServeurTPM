@@ -1,5 +1,7 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "techniciens")
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Techniciens implements Serializable{
 
 	@Id

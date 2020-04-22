@@ -23,6 +23,8 @@ import com.example.demo.model.LigneModel;
 import com.example.demo.model.PanneModel;
 import com.example.demo.reponses.LignesReponse;
 import com.example.demo.reponses.PannesReponse;
+import com.example.demo.reponses.PannesTechReponse;
+import com.example.demo.repository.PanneRepository;
 import com.example.demo.service.PannesService;
 import com.example.demo.service.inter.IPanneService;
 import java.util.Random;
@@ -36,6 +38,8 @@ public class PanneController {
 	private IPanneService panneService;
         @Autowired
         private PannesService ps;
+        @Autowired
+        private PanneRepository panneRepository;
 	
 	@GetMapping
 	public List<Pannes> getPannes(){
@@ -46,6 +50,11 @@ public class PanneController {
 	public List<PannesReponse> ToutesLesPannes(){
 		return panneService.toutesPannes();
 	}
+        
+        @GetMapping("/all/{numero}")
+	public List<PannesTechReponse> findByNum(@PathVariable int numero){
+		return panneRepository.Techs(numero);
+	}        
 	
 	@PostMapping
 	public void creationPanne(@RequestBody PanneModel panneModel) {

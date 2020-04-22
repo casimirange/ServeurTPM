@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "pannes")
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
+//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Pannes implements Serializable{
 	
 	@Id
