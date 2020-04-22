@@ -19,6 +19,7 @@ import javax.xml.soap.Text;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "pannes")
@@ -31,9 +32,18 @@ public class Pannes implements Serializable{
 	
 	private String cause;
 	
-	private String détails;
+	private String details;
 	
 	private String description;
+        
+        @Column(nullable = true)
+        private String outil;
+        
+        @Column(nullable = true)
+        private String ref;
+        
+        @Value("${some.key:0}")
+        private int qte;
 	
 	private java.sql.Date date;
 	  
@@ -45,12 +55,12 @@ public class Pannes implements Serializable{
 	
 	@ManyToOne
 	@JoinColumn(name = "idTechnicien")
-	@JsonIgnore
+//	@JsonIgnore
 	private Techniciens techniciens;
 	
 	@ManyToOne
 	@JoinColumn(name = "idOperateur")
-	@JsonIgnore
+//	@JsonIgnore
 	private Operateurs operateurs;
 	
 	@ManyToOne //plusieurs pannes pour une machine
@@ -58,13 +68,14 @@ public class Pannes implements Serializable{
 	@JsonIgnore
 	private Machines machines;
 	
-	private boolean etat = true;
+	private boolean etat;
 	
 	private int numero;
 	
-	/*@ManyToOne //plusieurs pannes pour une machine
-	@JoinColumn(name = "idOutil", nullable = true)
-	private Outils outils;*/
+//	@ManyToOne //plusieurs pannes pour une machine
+//	@JoinColumn(name = "idOutil", nullable = true)
+//        @JsonIgnore
+//	private Outils outils;
 
 	public Pannes() {
 		super();
@@ -72,40 +83,56 @@ public class Pannes implements Serializable{
 	}
 
 
-	public Pannes(String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-			Date debut_inter, Date fin_inter, boolean etat, int numero) {
-		super();
-		this.cause = cause;
-		this.détails = détails;
-		this.description = description;
-		this.date = date;
-		this.heure_arret = heure_arret;
-		this.debut_inter = debut_inter;
-		this.fin_inter = fin_inter;
-		this.etat = etat;
-		this.numero = numero;
-	}
+//	public Pannes(String cause, String détails, String description, java.sql.Date date, Date heure_arret,
+//			Date debut_inter, Date fin_inter, boolean etat, int numero) {
+//		super();
+//		this.cause = cause;
+//		this.details = détails;
+//		this.description = description;
+//		this.date = date;
+//		this.heure_arret = heure_arret;
+//		this.debut_inter = debut_inter;
+//		this.fin_inter = fin_inter;
+//		this.etat = etat;
+//		this.numero = numero;
+//	}
 
-	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-			Date debut_inter, Date fin_inter, Techniciens techniciens, Operateurs operateurs,
-			Machines machines, boolean etat, int numero, Outils outils) {
-		super();
-		this.idPanne = idPanne;
-		this.cause = cause;
-		this.détails = détails;
-		this.description = description;
-		this.date = date;
-		this.heure_arret = heure_arret;
-		this.debut_inter = debut_inter;
-		this.fin_inter = fin_inter;
-		this.techniciens = techniciens;
-		this.operateurs = operateurs;
-		this.machines = machines;
-		this.etat = etat;
-		this.numero = numero;
-		//this.outils = outils;
-	}
+//	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
+//			Date debut_inter, Date fin_inter, Techniciens techniciens, Operateurs operateurs,
+//			Machines machines, boolean etat, int numero, Outils outils) {
+//		super();
+//		this.idPanne = idPanne;
+//		this.cause = cause;
+//		this.details = détails;
+//		this.description = description;
+//		this.date = date;
+//		this.heure_arret = heure_arret;
+//		this.debut_inter = debut_inter;
+//		this.fin_inter = fin_inter;
+//		this.techniciens = techniciens;
+//		this.operateurs = operateurs;
+//		this.machines = machines;
+//		this.etat = etat;
+//		this.numero = numero;
+//		this.outils = outils;
+//	}
 
+    public Pannes(String cause, String details, String description, String outil, String ref, int qte, java.sql.Date date, Date heure_arret, Date debut_inter, Date fin_inter, boolean etat, int numero) {
+        this.cause = cause;
+        this.details = details;
+        this.description = description;
+        this.outil = outil;
+        this.ref = ref;
+        this.qte = qte;
+        this.date = date;
+        this.heure_arret = heure_arret;
+        this.debut_inter = debut_inter;
+        this.fin_inter = fin_inter;
+        this.etat = etat;
+        this.numero = numero;
+    }
+     
+      
 
 
 	public Long getIdPanne() {
@@ -124,12 +151,12 @@ public class Pannes implements Serializable{
 		this.cause = cause;
 	}
 
-	public String getDétails() {
-		return détails;
+	public String getDetails() {
+		return details;
 	}
 
-	public void setDétails(String détails) {
-		this.détails = détails;
+	public void setDetails(String details) {
+		this.details = details;
 	}
 
 	public String getDescription() {
@@ -210,15 +237,15 @@ public class Pannes implements Serializable{
 
 
 
-	/*public Outils getOutils() {
-		return outils;
-	}
+//	public Outils getOutils() {
+//		return outils;
+//	}
 
 
 
-	public void setOutils(Outils outils) {
-		this.outils = outils;
-	}*/
+//	public void setOutils(Outils outils) {
+//		this.outils = outils;
+//	}
 
 	public boolean isEtat() {
 		return etat;
@@ -235,6 +262,31 @@ public class Pannes implements Serializable{
 	public void setNumero(int numero) {
 		this.numero = numero;
 	}
+
+
+    public String getOutil() {
+        return outil;
+    }
+
+    public void setOutil(String outil) {
+        this.outil = outil;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    public int getQte() {
+        return qte;
+    }
+
+    public void setQte(int qte) {
+        this.qte = qte;
+    }
 	
 	
 	

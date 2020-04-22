@@ -16,17 +16,23 @@ public class PanneModel {
 	
 	String cause;
 	
-	String détails;
+	String details;
 	
 	String description;
+        
+        String outil;
+        
+        String ref;
+        
+        int qte;
 	
 	java.sql.Date date;
 	  
-	Date heure_arret;
+	Date heureArret;
 	
-	Date debut_inter; 
+	Date debutInter; 
 	
-	Date fin_inter;
+	Date finInter;
 	
 	Long idTechnicien;
 	
@@ -56,12 +62,12 @@ public class PanneModel {
 		this.cause = cause;
 	}
 
-	public String getDétails() {
-		return détails;
+	public String getDetails() {
+		return details;
 	}
 
-	public void setDétails(String détails) {
-		this.détails = détails;
+	public void setDetails(String details) {
+		this.details = details;
 	}
 
 	public String getDescription() {
@@ -81,28 +87,28 @@ public class PanneModel {
 		this.date = date;
 	}
 
-	public Date getHeure_arret() {
-		return heure_arret;
+	public Date getHeureArret() {
+		return heureArret;
 	}
 
-	public void setHeure_arret(Date heure_arret) {
-		this.heure_arret = heure_arret;
+	public void setHeureArret(Date heure_arret) {
+		this.heureArret = heure_arret;
 	}
 
-	public Date getDebut_inter() {
-		return debut_inter;
+	public Date getDebutInter() {
+		return debutInter;
 	}
 
-	public void setDebut_inter(Date debut_inter) {
-		this.debut_inter = debut_inter;
+	public void setDebutInter(Date debut_inter) {
+		this.debutInter = debut_inter;
 	}
 
-	public Date getFin_inter() {
-		return fin_inter;
+	public Date getFinInter() {
+		return finInter;
 	}
 
-	public void setFin_inter(Date fin_inter) {
-		this.fin_inter = fin_inter;
+	public void setFinInter(Date fin_inter) {
+		this.finInter = fin_inter;
 	}
 
 	public Long getIdTechnicien() {
@@ -152,6 +158,30 @@ public class PanneModel {
 	public void setIdOutil(Long idOutil) {
 		this.idOutil = idOutil;
 	}
+
+    public String getOutil() {
+        return outil;
+    }
+
+    public void setOutil(String outil) {
+        this.outil = outil;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    public int getQte() {
+        return qte;
+    }
+
+    public void setQte(int qte) {
+        this.qte = qte;
+    }
 	
 	
 	

@@ -23,8 +23,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     	    .authorizeRequests()
     	    .antMatchers("/api/**").hasRole("USER")
     	    .antMatchers("/**").hasRole("ADMIN")
-    	    .antMatchers("**/**").hasRole("SUPER_ADMMIN").and()
-    	    .csrf().disable().headers().frameOptions().disable();
+    	    .antMatchers("**/**").hasRole("SUPER_ADMMIN")
+            .antMatchers("**/*.js").hasRole("USER")
+            .antMatchers("**/*.js").hasRole("ADMIN")    
+            .antMatchers("**/*.js").hasRole("SUPER_ADMMIN")    
+            .and().csrf().disable().headers().frameOptions().disable();
     	
     }
     

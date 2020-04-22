@@ -1,6 +1,7 @@
 package com.example.demo.reponses;
 
 import java.util.Date;
+import javax.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,17 @@ public class PannesReponse {
         private int numero;
         private String cause;
         private String description;
-        private String détails;
+        private String details;
         private Date heureArret;
         private Date debutInter;
         private Date finInter;
         private boolean etat;
+        @Column(nullable = true)
+        private String outil;
+        @Column(nullable = true)
+        private String ref;
+        @Column(nullable = true)
+        private int qte;
         
         private String nomOP;
         private String prenomOP;

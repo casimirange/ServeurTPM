@@ -23,7 +23,9 @@ import com.example.demo.model.LigneModel;
 import com.example.demo.model.PanneModel;
 import com.example.demo.reponses.LignesReponse;
 import com.example.demo.reponses.PannesReponse;
+import com.example.demo.service.PannesService;
 import com.example.demo.service.inter.IPanneService;
+import java.util.Random;
 
 @RestController 
 @CrossOrigin
@@ -32,10 +34,12 @@ public class PanneController {
 
 	@Autowired
 	private IPanneService panneService;
+        @Autowired
+        private PannesService ps;
 	
 	@GetMapping
 	public List<Pannes> getPannes(){
-		return panneService.allPannes();
+		return ps.allPannes();
 	}
         
         @GetMapping("/all")
@@ -44,32 +48,41 @@ public class PanneController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Pannes> creationPanne(@RequestBody PanneModel panneModel) {
-		Pannes panne = new Pannes(panneModel.getCause(), 
-								  panneModel.getDétails(), 
-								  panneModel.getDescription(), 
-								  panneModel.getDate(), 
-								  panneModel.getHeure_arret(), 
-								  panneModel.getDebut_inter(), 
-								  panneModel.getFin_inter(), 
-								  panneModel.isEtat(), 
-								  panneModel.getNumero());
+	public void creationPanne(@RequestBody PanneModel panneModel) {
+            
+		Pannes panne = new Pannes(
+                        panneModel.getCause(), 
+                        panneModel.getDetails(), 
+                        panneModel.getDescription(), 
+                        panneModel.getOutil(),
+                        panneModel.getRef(),
+                        panneModel.getQte(),
+                        panneModel.getDate(), 
+                        panneModel.getHeureArret(), 
+                        panneModel.getDebutInter(), 
+                        panneModel.getFinInter(), 
+                        panneModel.isEtat(), 
+                        panneModel.getNumero());
 		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
 		
-		return new ResponseEntity<>(panne,HttpStatus.CREATED);
+//		return new ResponseEntity<>(panne,HttpStatus.CREATED);
 	}
 	
 	@PutMapping
 	public ResponseEntity<Pannes> continuePanne(@RequestBody PanneModel panneModel) {
-		Pannes panne = new Pannes(panneModel.getCause(), 
-				  panneModel.getDétails(), 
-				  panneModel.getDescription(), 
-				  panneModel.getDate(), 
-				  panneModel.getHeure_arret(), 
-				  panneModel.getDebut_inter(), 
-				  panneModel.getFin_inter(), 
-				  panneModel.isEtat(), 
-				  panneModel.getNumero());
+		Pannes panne = new Pannes(
+                        panneModel.getCause(), 
+                        panneModel.getDetails(), 
+                        panneModel.getDescription(), 
+                        panneModel.getOutil(),
+                        panneModel.getRef(),
+                        panneModel.getQte(),
+                        panneModel.getDate(), 
+                        panneModel.getHeureArret(), 
+                        panneModel.getDebutInter(), 
+                        panneModel.getFinInter(), 
+                        panneModel.isEtat(), 
+                        panneModel.getNumero());
 		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
 
 		return new ResponseEntity<>(panne,HttpStatus.CREATED);

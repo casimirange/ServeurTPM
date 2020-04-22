@@ -21,13 +21,14 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
             + "JOIN p.machines m";
     
     String quer2 = "SELECT new com.example.demo.reponses.PannesReponse("
-            + "m.nom as machine, m.code,"
-            + "p.date, p.numero, p.cause, p.description, p.détails, p.heure_arret, p.debut_inter, p.fin_inter, p.etat,"
+            + "m.nom as machine, m.code, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction  )"
-            + " FROM Pannes p JOIN p.techniciens t "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction) "
+            + "FROM Pannes p JOIN p.techniciens t "
             + "JOIN p.operateurs o "
-            + "JOIN p.machines m";
+            + "JOIN p.machines m "
+            + "order By p.idPanne desc";
   
     //String quer2 = "SELECT new LignesReponse(nomLigne) FROM lignes";
     @Query( value=quer2)
