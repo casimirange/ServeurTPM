@@ -9,6 +9,8 @@ import com.example.demo.entity.Machines;
 import com.example.demo.entity.Operateurs;
 import com.example.demo.entity.Outils;
 import com.example.demo.entity.Techniciens;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PanneModel {
 
@@ -26,13 +28,13 @@ public class PanneModel {
         
         int qte;
 	
-	java.sql.Date date;
+	LocalDate date;
 	  
-	Date heureArret;
+	LocalDateTime heureArret;
 	
-	Date debutInter; 
+	LocalDateTime debutInter; 
 	
-	Date finInter;
+	LocalDateTime finInter;
 	
 	Long idTechnicien;
 	
@@ -79,35 +81,35 @@ public class PanneModel {
 	}
 
 
-	public java.sql.Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-	public void setDate(java.sql.Date date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 
-	public Date getHeureArret() {
+	public LocalDateTime getHeureArret() {
 		return heureArret;
 	}
 
-	public void setHeureArret(Date heure_arret) {
+	public void setHeureArret(LocalDateTime heure_arret) {
 		this.heureArret = heure_arret;
 	}
 
-	public Date getDebutInter() {
+	public LocalDateTime getDebutInter() {
 		return debutInter;
 	}
 
-	public void setDebutInter(Date debut_inter) {
+	public void setDebutInter(LocalDateTime debut_inter) {
 		this.debutInter = debut_inter;
 	}
 
-	public Date getFinInter() {
+	public LocalDateTime getFinInter() {
 		return finInter;
 	}
 
-	public void setFinInter(Date fin_inter) {
+	public void setFinInter(LocalDateTime fin_inter) {
 		this.finInter = fin_inter;
 	}
 

@@ -1,11 +1,11 @@
 package com.example.demo.reponses;
 
 import java.util.Date;
-import javax.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
 
 @Data
 @AllArgsConstructor
@@ -13,6 +13,7 @@ import lombok.ToString;
 @ToString
 public class PannesTechReponse {
 	
+        
         private String nomTec;
         private String preTec;
         private Long matricule;

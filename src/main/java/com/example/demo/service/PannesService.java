@@ -13,7 +13,9 @@ import com.example.demo.entity.Operateurs;
 import com.example.demo.entity.Outils;
 import com.example.demo.entity.Pannes;
 import com.example.demo.entity.Techniciens;
+import com.example.demo.reponses.PannesNonAcheveesReponse;
 import com.example.demo.reponses.PannesReponse;
+import com.example.demo.reponses.PannesHeureReponse;
 import com.example.demo.reponses.PannesTechReponse;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.OperateurRepository;
@@ -50,12 +52,14 @@ public class PannesService implements IPanneService {
 	@Override
 	public List<PannesReponse> toutesPannes() {
 		return panneRepository.ToutesLesPannes();
-	}      
-        
-        
+	}               
 	
 	public List<PannesTechReponse> FindByNum(int numero) {
 		return panneRepository.Techs(numero);
+	}
+        
+	public List<PannesNonAcheveesReponse> PannesNonAchevees() {
+		return panneRepository.PannesNonAchevees();
 	}
 
 	@Override
@@ -112,7 +116,7 @@ public class PannesService implements IPanneService {
 	}	*/	
 
 	@Override
-	public void updatePanne(Pannes panne, Long code_machine, Long id_oper, Long id_tech, Long id_outil) {
+	public void updatePanne(Pannes panne, Long code_machine, Long id_oper, Long id_tech) {
 		Machines machine = machineRepository.getOne(code_machine);
 		Operateurs oper = operateurRepository.getOne(id_oper);
 		//Outils outil = outilRepository.getOne(id_outil);
@@ -135,6 +139,11 @@ public class PannesService implements IPanneService {
 		panne.setIdPanne(numero);
 		panneRepository.delete(panne);
 	}
+
+    @Override
+    public PannesReponse showPanne(int numero) {
+        return panneRepository.findPanne(numero);
+    }
 
 
 

@@ -19,7 +19,6 @@ import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "techniciens")
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Techniciens implements Serializable{
 
 	@Id

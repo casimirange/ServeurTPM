@@ -17,7 +17,11 @@ public interface IPanneService {
 	
 	//void continuePanne(Pannes panne, Long numero, Long code_machine, Long id_oper, Long id_tech);
 	
-	void updatePanne(Pannes panne, Long code_machine, Long id_oper, Long id_tech, Long id_outil);
+	void updatePanne(Pannes panne, Long code_machine, Long id_oper, Long id_tech);
 	
 	void deletePanne(Long numero);
+
+        PannesReponse showPanne(int numero);
+        
+        
 }

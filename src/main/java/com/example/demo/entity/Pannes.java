@@ -19,11 +19,13 @@ import javax.xml.soap.Text;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "pannes")
-//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public class Pannes implements Serializable{
 	
 	@Id
@@ -45,22 +47,22 @@ public class Pannes implements Serializable{
         @Value("${some.key:0}")
         private int qte;
 	
-	private java.sql.Date date;
+	private LocalDate date;
 	  
-	private Date heure_arret;
+	private LocalDateTime heure_arret;
 	
-	private Date debut_inter; 
+	private LocalDateTime debut_inter; 
 	
-	private Date fin_inter;
+	private LocalDateTime fin_inter;
 	
 	@ManyToOne
 	@JoinColumn(name = "idTechnicien")
-//	@JsonIgnore
+	@JsonIgnore
 	private Techniciens techniciens;
 	
 	@ManyToOne
 	@JoinColumn(name = "idOperateur")
-//	@JsonIgnore
+	@JsonIgnore
 	private Operateurs operateurs;
 	
 	@ManyToOne //plusieurs pannes pour une machine
@@ -117,7 +119,7 @@ public class Pannes implements Serializable{
 //		this.outils = outils;
 //	}
 
-    public Pannes(String cause, String details, String description, String outil, String ref, int qte, java.sql.Date date, Date heure_arret, Date debut_inter, Date fin_inter, boolean etat, int numero) {
+    public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, int numero) {
         this.cause = cause;
         this.details = details;
         this.description = description;
@@ -168,37 +170,37 @@ public class Pannes implements Serializable{
 	}
 	
 
-	public java.sql.Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
 
-	public void setDate(java.sql.Date date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 
 
-	public Date getHeure_arret() {
+	public LocalDateTime getHeure_arret() {
 		return heure_arret;
 	}
 
-	public void setHeure_arret(Date heure_arret) {
+	public void setHeure_arret(LocalDateTime heure_arret) {
 		this.heure_arret = heure_arret;
 	}
 
-	public Date getDebut_inter() {
+	public LocalDateTime getDebut_inter() {
 		return debut_inter;
 	}
 
-	public void setDebut_inter(Date debut_inter) {
+	public void setDebut_inter(LocalDateTime debut_inter) {
 		this.debut_inter = debut_inter;
 	}
 
-	public Date getFin_inter() {
+	public LocalDateTime getFin_inter() {
 		return fin_inter;
 	}
 
-	public void setFin_inter(Date fin_inter) {
+	public void setFin_inter(LocalDateTime fin_inter) {
 		this.fin_inter = fin_inter;
 	}
 

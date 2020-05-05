@@ -13,11 +13,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class PannesReponse {
+public class PannesNonAcheveesReponse {
 
 	private String machine;	
 	private String code;  
-        private Long idMachine;
         
         private LocalDate date;
         private int numero;
