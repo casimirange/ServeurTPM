@@ -2,6 +2,8 @@ package com.example.demo.entity;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -20,11 +22,9 @@ public class Heures implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idHeure;
 	
-	private Time heure_debut;
+	private double heure;
 	
-	private Time heure_fin;
-	
-	private Date date;
+	private LocalDate date;
 	
 	@ManyToOne //plusieurs lignes pour un département
 	@JoinColumn(name = "idMachine")
@@ -35,55 +35,42 @@ public class Heures implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Heures(Long idHeure, Time heure_debut, Time heure_fin, Date date, Machines machine) {
-		super();
-		this.idHeure = idHeure;
-		this.heure_debut = heure_debut;
-		this.heure_fin = heure_fin;
-		this.date = date;
-		this.machines = machine;
-	}
+    public Heures(double heure, LocalDate date) {
+        this.heure = heure;
+        this.date = date;
+    }
 
-	public Long getIdHeure() {
-		return idHeure;
-	}
+    public Long getIdHeure() {
+        return idHeure;
+    }
 
-	public void setIdHeure(Long idHeure) {
-		this.idHeure = idHeure;
-	}
+    public void setIdHeure(Long idHeure) {
+        this.idHeure = idHeure;
+    }
 
-	public Time getHeure_debut() {
-		return heure_debut;
-	}
+    public double getHeure() {
+        return heure;
+    }
 
-	public void setHeure_debut(Time heure_debut) {
-		this.heure_debut = heure_debut;
-	}
+    public void setHeure(double heure) {
+        this.heure = heure;
+    }
 
-	public Time getHeure_fin() {
-		return heure_fin;
-	}
+    public LocalDate getDate() {
+        return date;
+    }
 
-	public void setHeure_fin(Time heure_fin) {
-		this.heure_fin = heure_fin;
-	}
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-	public Date getDate() {
-		return date;
-	}
+    public Machines getMachines() {
+        return machines;
+    }
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
-
-	public Machines getMachine() {
-		return machines;
-	}
-
-	public void setMachine(Machines machine) {
-		this.machines = machine;
-	}
-	
+    public void setMachines(Machines machines) {
+        this.machines = machines;
+    }
 	
 	
 }

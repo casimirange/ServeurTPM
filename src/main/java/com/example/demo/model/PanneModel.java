@@ -44,7 +44,13 @@ public class PanneModel {
 	
 	boolean etat;
 	
-	int numero;
+	String numero;
+        
+        int DT;
+        
+        int WT;
+        
+        int TTR;
 	
 	Long idOutil;
 
@@ -145,11 +151,11 @@ public class PanneModel {
 		this.etat = etat;
 	}
 
-	public int getNumero() {
+	public String getNumero() {
 		return numero;
 	}
 
-	public void setNumero(int numero) {
+	public void setNumero(String numero) {
 		this.numero = numero;
 	}
 
@@ -183,6 +189,30 @@ public class PanneModel {
 
     public void setQte(int qte) {
         this.qte = qte;
+    }
+
+    public int getDT() {
+        return DT;
+    }
+
+    public void setDT(int DT) {
+        this.DT = DT;
+    }
+
+    public int getWT() {
+        return WT;
+    }
+
+    public void setWT(int WT) {
+        this.WT = WT;
+    }
+
+    public int getTTR() {
+        return TTR;
+    }
+
+    public void setTTR(int TTR) {
+        this.TTR = TTR;
     }
 	
 	

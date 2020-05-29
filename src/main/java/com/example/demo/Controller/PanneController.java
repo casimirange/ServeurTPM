@@ -23,6 +23,7 @@ import com.example.demo.model.LigneModel;
 import com.example.demo.model.PanneModel;
 import com.example.demo.reponses.CountPannesResponse;
 import com.example.demo.reponses.LignesReponse;
+import com.example.demo.reponses.PSR;
 import com.example.demo.reponses.PannesNonAcheveesReponse;
 import com.example.demo.reponses.PannesReponse;
 import com.example.demo.reponses.PannesHeureReponse;
@@ -36,6 +37,7 @@ import static java.time.temporal.TemporalQueries.zone;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
+import net.minidev.json.JSONObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -62,22 +64,22 @@ public class PanneController {
 	}
         
         @GetMapping("/all")
-	public List<PannesReponse> ToutesLesPannes(){
-		return panneService.toutesPannes();
+	public List<JSONObject> ToutesLesPannes(){
+		return panneRepository.ToutesLesPannes();
 	}
         
         @GetMapping("/tech/{numero}")
-	public List<PannesTechReponse> findTechByNum(@PathVariable int numero){
+	public List<PannesTechReponse> findTechByNum(@PathVariable String numero){
 		return panneRepository.Techs(numero);
 	}
         
         @GetMapping("/heure/{numero}")
-	public List<PannesHeureReponse> findHeureByNum(@PathVariable int numero){
+	public List<PannesHeureReponse> findHeureByNum(@PathVariable String numero){
 		return panneRepository.Heures(numero);
 	}
         
         @GetMapping("/today")
-	public List<PannesReponse> today(){
+	public List<JSONObject> today(){
             LocalDate date = LocalDate.now();
 		return panneRepository.ToDayPannes(date);
 	}
@@ -89,13 +91,13 @@ public class PanneController {
 	}
         
         @GetMapping("/hier")
-	public List<PannesReponse> hier(){
+	public List<JSONObject> hier(){
             LocalDate date = LocalDate.now().minusDays(1);
 		return panneRepository.ToDayPannes(date);
 	}
         
         @GetMapping("/csem")
-	public List<PannesReponse> thisWeek(){
+	public List<JSONObject> thisWeek(){
             
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
@@ -129,7 +131,7 @@ public class PanneController {
 	}
         
         @GetMapping("/semp")
-	public List<PannesReponse> lastWeek(){
+	public List<JSONObject> lastWeek(){
             
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
@@ -162,18 +164,13 @@ public class PanneController {
 	}
         
         @GetMapping("/Date_range")
-	public List<PannesReponse> dateRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2, PanneModel model){            
-            
-//                date1 = LocalDate.MIN;
-//                date2 = LocalDate.MAX;  
-            
-            
+	public List<JSONObject> dateRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){            
             return panneRepository.WeekPannes(date1, date2);
 	}
         
         
         @GetMapping("/thisMonth")
-	public List<PannesReponse> thisMonth(){
+	public List<JSONObject> thisMonth(){
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
@@ -189,7 +186,7 @@ public class PanneController {
 	}
         
         @GetMapping("/lastMonth")
-	public List<PannesReponse> lastMonth(){
+	public List<JSONObject> lastMonth(){
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
@@ -208,7 +205,7 @@ public class PanneController {
 	}
         
         @GetMapping("/thisYear")
-	public List<PannesReponse> thisYear(){
+	public List<JSONObject> thisYear(){
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int year = cal.get(Calendar.YEAR);
@@ -219,7 +216,7 @@ public class PanneController {
 	}
         
         @GetMapping("/lastYear")
-	public List<PannesReponse> lastYear(){
+	public List<JSONObject> lastYear(){
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int year = cal.get(Calendar.YEAR);
@@ -235,12 +232,12 @@ public class PanneController {
         
         
         @GetMapping("/{numero}")
-	public PannesReponse findPanne(@PathVariable int numero){
+	public JSONObject findPanne(@PathVariable String numero){
 		return panneRepository.findPanne(numero);
 	}
         
         @GetMapping("/p/{numero}")
-	public List<Pannes> findPannes(@PathVariable int numero){
+	public List<Pannes> findPannes(@PathVariable String numero){
 		return panneRepository.findByNumero(numero);
 	}
 
@@ -252,6 +249,11 @@ public class PanneController {
         @GetMapping("/count")
         public List<CountPannesResponse> countAll(){
             return panneRepository.TotalLPannes();
+        } 
+        
+        @GetMapping("/countDep")
+        public List<CountPannesResponse> countDepAll(){
+            return panneRepository.TotallDepPannes();
         }
 	
 	@PostMapping
@@ -269,7 +271,11 @@ public class PanneController {
                         panneModel.getDebutInter(), 
                         panneModel.getFinInter(), 
                         panneModel.isEtat(), 
-                        panneModel.getNumero());
+                        panneModel.getNumero(),
+                        panneModel.getDT(),
+                        panneModel.getWT(),
+                        panneModel.getTTR()
+                );
 		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
 		
 //		return new ResponseEntity<>(panne,HttpStatus.CREATED);
@@ -289,7 +295,11 @@ public class PanneController {
                         panneModel.getDebutInter(), 
                         panneModel.getFinInter(), 
                         panneModel.isEtat(), 
-                        panneModel.getNumero());
+                        panneModel.getNumero(),
+                        panneModel.getDT(),
+                        panneModel.getWT(),
+                        panneModel.getTTR()
+                );
 		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
 
 		return new ResponseEntity<>(panne,HttpStatus.CREATED);
@@ -301,7 +311,7 @@ public class PanneController {
 	}
         
         @PutMapping("/{numero}")
-	public void activePanne(@PathVariable int numero) {
+	public void activePanne(@PathVariable String numero) {
 	    List<Pannes> pan = new ArrayList<>();
             PanneModel panneModel = new PanneModel();
             

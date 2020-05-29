@@ -17,7 +17,7 @@ public class PannesHeureReponse {
         private LocalDateTime heureArret;
         private LocalDateTime debutInter;
         private LocalDateTime finInter;
-        private int numero;
+        private String numero;
         
         
 }

@@ -20,7 +20,7 @@ public class PannesReponse {
         private Long idMachine;
         
         private LocalDate date;
-        private int numero;
+        private String numero;
         private String cause;
         private String description;
         private String details;

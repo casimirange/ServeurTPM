@@ -14,10 +14,11 @@ import com.example.demo.repository.DepartementRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UtilisateurRepository;
 import com.example.demo.util.RoleEnum;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 @SpringBootApplication
 public class ServeurTpmApplication {
-
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ctx = SpringApplication.run(ServeurTpmApplication.class, args);
 		

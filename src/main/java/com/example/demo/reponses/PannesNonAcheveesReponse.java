@@ -19,7 +19,7 @@ public class PannesNonAcheveesReponse {
 	private String code;  
         
         private LocalDate date;
-        private int numero;
+        private String numero;
         private String cause;
         private String description;
         private String details;

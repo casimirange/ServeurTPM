@@ -72,7 +72,10 @@ public class Pannes implements Serializable{
 	
 	private boolean etat;
 	
-	private int numero;
+	private String numero;
+        private int DT;
+        private int WT;
+        private int TTR;
 	
 //	@ManyToOne //plusieurs pannes pour une machine
 //	@JoinColumn(name = "idOutil", nullable = true)
@@ -119,7 +122,23 @@ public class Pannes implements Serializable{
 //		this.outils = outils;
 //	}
 
-    public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, int numero) {
+//    public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, int numero) {
+//        this.cause = cause;
+//        this.details = details;
+//        this.description = description;
+//        this.outil = outil;
+//        this.ref = ref;
+//        this.qte = qte;
+//        this.date = date;
+//        this.heure_arret = heure_arret;
+//        this.debut_inter = debut_inter;
+//        this.fin_inter = fin_inter;
+//        this.etat = etat;
+//        this.numero = numero;
+//    }
+
+    public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, 
+            LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, String numero, int DT, int WT, int TTR) {
         this.cause = cause;
         this.details = details;
         this.description = description;
@@ -132,6 +151,9 @@ public class Pannes implements Serializable{
         this.fin_inter = fin_inter;
         this.etat = etat;
         this.numero = numero;
+        this.DT = DT;
+        this.WT = WT;
+        this.TTR = TTR;
     }
      
       
@@ -257,11 +279,11 @@ public class Pannes implements Serializable{
 		this.etat = etat;
 	}
 
-	public int getNumero() {
+	public String getNumero() {
 		return numero;
 	}
 
-	public void setNumero(int numero) {
+	public void setNumero(String numero) {
 		this.numero = numero;
 	}
 
@@ -289,8 +311,29 @@ public class Pannes implements Serializable{
     public void setQte(int qte) {
         this.qte = qte;
     }
-	
-	
-	
 
+    public int getDT() {
+        return DT;
+    }
+
+    public void setDT(int DT) {
+        this.DT = DT;
+    }
+
+    public int getWT() {
+        return WT;
+    }
+
+    public void setWT(int WT) {
+        this.WT = WT;
+    }
+
+    public int getTTR() {
+        return TTR;
+    }
+
+    public void setTTR(int TTR) {
+        this.TTR = TTR;
+    }
+    
 }

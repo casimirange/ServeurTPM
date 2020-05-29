@@ -21,11 +21,11 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CountPannesResponse {
+public class PSR {
     private String machine;	
 	private String code;  
         private Long idMachine;
-        private Long nbre;
+        
         private LocalDate date;
         private String numero;
         private String cause;
@@ -42,6 +42,10 @@ public class CountPannesResponse {
         @Column(nullable = true)
         private int qte;
         
+        private Long wt;
+        private Long ttr;
+        private Long dt;
+        
         private String nomOP;
         private String prenomOP;
         private Long matOp;
@@ -50,8 +54,4 @@ public class CountPannesResponse {
         private String preTec;
         private Long matricule;
         private String fonction;
-        
-        private String dep;
-        private Long idDepartement;
-        
 }
