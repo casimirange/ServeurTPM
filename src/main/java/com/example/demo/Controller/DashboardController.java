@@ -183,8 +183,7 @@ public class DashboardController {
 //    }
     
     @GetMapping("/mtbfByYear")
-    public List<JSONObject> MTBFTByYearAlpi(){
-        
+    public List<JSONObject> MTBFTByYearAlpi(){        
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> hby = dashboardRepository.hourByYear();
         List<JSONObject> pby = dashboardRepository.PByYear();
@@ -194,9 +193,8 @@ public class DashboardController {
          List<Map<String,String>> reponse = new ArrayList<>();
          
          List<JSONObject> test = new ArrayList<>();
-         List<JSONObject> test2 = new ArrayList<>();      
+         List<JSONObject> test2 = new ArrayList<>();    
          
-
         hby.forEach(y->{
             pby.forEach(t-> {
                 aby.forEach(a->{                   
@@ -216,8 +214,7 @@ public class DashboardController {
                });              
             });      
                   test.add(json);        
-        });           
-        
+        });          
         return test;
     }
     

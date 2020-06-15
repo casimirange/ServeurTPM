@@ -21,8 +21,10 @@ import com.example.demo.entity.Machines;
 import com.example.demo.entity.Operateurs;
 import com.example.demo.model.LigneModel;
 import com.example.demo.model.MachineModel;
+import com.example.demo.repository.MachineRepository;
 import com.example.demo.service.inter.IMachineService;
 import com.example.demo.service.inter.IOperateurService;
+import net.minidev.json.JSONObject;
 
 @RestController
 @CrossOrigin
@@ -31,6 +33,9 @@ public class MachineController {
 	
 	@Autowired
 	private IMachineService machineService;
+        
+        @Autowired
+	private MachineRepository machineRepository;
 	
 	@GetMapping
 	public List<Machines> getMachines(){
@@ -61,5 +66,9 @@ public class MachineController {
 		machineService.deleteMachine(code);
 	}
 	
+        @GetMapping("/departement/{dep}")
+	public List<JSONObject> allMachinesByDepartmetn(@PathVariable Long dep){
+		return machineRepository.machDep(dep);
+	}
 
 }
