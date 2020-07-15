@@ -17,6 +17,7 @@ public class PannesNonAcheveesReponse {
 
 	private String machine;	
 	private String code;  
+	private Long idM;  
         
         private LocalDate date;
         private String numero;

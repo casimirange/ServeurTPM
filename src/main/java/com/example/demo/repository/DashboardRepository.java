@@ -74,9 +74,9 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     @Query( value=countThisYear, nativeQuery = true)
     public List<JSONObject> countThisYear(String date);
     
-    String test = "SELECT distinct date, count(distinct numero)as nbre, "
-            + "sum(distinct timestampdiff(Minute, heure_arret, fin_inter)) as dt "
-            + "FROM Pannes where date between ?1 and ?2  GROUP by date order by date asc";
+    String test = "SELECT date, count(distinct numero)as nbre, "
+            + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
+            + "FROM Pannes where date between ?1 and ?2  GROUP by date, numero order by date asc";
     
 //    String test = "SELECT new com.example.demo.reponses.StatsRepose("
 //            + "date, count(DISTINCT numero) as nbre, SUM(DT) as dt)"
@@ -92,7 +92,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "AVG(DISTINCT timestampdiff(minute, p.heure_arret, p.debut_inter)) as WT, "
             + "AVG(DISTINCT timestampdiff(minute, p.debut_inter, p.fin_inter)) as MTTR, "
             + "COUNT(DISTINCT p.numero) as nbre  "
-            + "FROM pannes p GROUP BY date_format(p.date, '%Y') order by p.date asc limit 1,3";
+            + "FROM pannes p GROUP BY date_format(p.date, '%Y'), p.numero order by p.date asc limit 1,3";
     
     @Query(value = mdtyear, nativeQuery = true)
     public List<JSONObject> mdtByYear();
@@ -146,16 +146,18 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     
     ////////////je me suis faché
     String pByYear = "SELECT date_format(h.date, '%Y') as date,\n" +
-            "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n"
+            "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT, \n"+
+            "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.debut_inter)), 0) as WT, \n"+
+            "COALESCE(sum(DISTINCT timestampdiff(minute, p.debut_inter, p.fin_inter)), 0) as TTR, \n"
             + "count(DISTINCT p.numero) as nbre " +
             "from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%Y') = date_format(h.date, '%Y')) \n" +
-            "GROUP by date_format(h.date, '%Y')";
+            "GROUP by date_format(h.date, '%Y'), p.numero";
     
     @Query(value = pByYear, nativeQuery = true)
     public List<JSONObject> PByYear();
     
     String aByYear = "SELECT date_format(h.date, '%Y') as date,\n" +
-            "sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)) as AT\n" +
+            "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
             "\n" +
             "from  heures h LEFT OUTER JOIN arrets a on (date_format(a.date, '%Y') = date_format(h.date, '%Y')) \n" +
             "GROUP by date_format(h.date, '%Y')";
@@ -164,7 +166,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     public List<JSONObject> AByYear();
     
     String aThisYear = "SELECT date_format(h.date, '%b') as date, "
-            + "sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)) as AT " +
+            + "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT " +
 "            from  heures h LEFT OUTER JOIN arrets a on (date_format(a.date, '%b%Y') = date_format(h.date, '%b%Y')) " +
 "            WHERE date_format(h.date, '%Y') = ?1 " +
 "            GROUP by date_format(h.date, '%b%Y') ORDER BY h.date";
@@ -173,15 +175,28 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     public List<JSONObject> AThisYear(String date);
     
     String pThisYear = "SELECT date_format(h.date, '%b') as date, " +
-"            sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, " +
+"            COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT, " +
+"            COALESCE(sum(DISTINCT timestampdiff(minute, p.debut_inter, p.fin_inter)), 0) as TTR, " +
+"            COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.debut_inter)), 0) as WT, " +
 "            COUNT(DISTINCT p.numero) as nbre " +
 "            from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%b%Y') = date_format(h.date, '%b%Y'))  " +
 "            WHERE date_format(h.date, '%Y') = ?1 " +
-"            GROUP by date_format(h.date, '%b%Y') ORDER BY h.date";
+"            GROUP by date_format(h.date, '%b%Y'), p.numero ORDER BY h.date";
     
     @Query(value = pThisYear, nativeQuery = true)
     public List<JSONObject> PThisYear(String date);
     
-    
+    String techStats = "SELECT date_format(p.date, '%b %Y') as date, m.nom, t.nom as tec, t.matricule, t.fonction,\n" +
+        "COUNT(DISTINCT p.numero) as nbre,\n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT \n" +
+        "FROM pannes p\n" +
+        "inner join machines m on p.id_machine = m.id_machine\n" +
+        "join techniciens t on t.id_technicien = p.id_technicien\n" +
+        "WHERE date_format(p.date, '%Y/%m') = ?1\n" +
+        "GROUP BY t.nom, p.numero";
+  
+    @Query( value=techStats, nativeQuery = true)
+    public List<JSONObject> TechniciensStats(String date);
     
 }

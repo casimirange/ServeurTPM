@@ -104,7 +104,7 @@ public class PanneController {
             int week = cal.get(Calendar.DAY_OF_WEEK);
             System.out.println("jour de la semaine: "+week);
             if(week == 1){
-                date1 = LocalDate.now().minusDays(7);
+                date1 = LocalDate.now().minusDays(6);
                 date2 = LocalDate.now();                
             }else if(week == 2){
                 date1 = LocalDate.now();
@@ -248,7 +248,17 @@ public class PanneController {
         
         @GetMapping("/count")
         public List<CountPannesResponse> countAll(){
-            return panneRepository.TotalLPannes();
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("ce mois: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }
+            return panneRepository.TotalLPannes(mts);
         } 
         
         @GetMapping("/countDep")

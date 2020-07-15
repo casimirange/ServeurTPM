@@ -22,7 +22,7 @@ import org.springframework.data.repository.query.Param;
 public interface PanneRepository extends JpaRepository<Pannes, Long> {
     
     String quer1 = "SELECT "
-            + "m.nom as machine, m.code, m.id_machine, "
+            + "m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -48,7 +48,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<PannesTechReponse> Techs(String numero);
     
     String quer3 = "SELECT new com.example.demo.reponses.PannesNonAcheveesReponse("
-            + "m.nom as machine, m.code, "
+            + "m.nom as machine, m.code, m.idMachine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
             + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction) "
@@ -64,7 +64,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<PannesNonAcheveesReponse> PannesNonAchevees();
     
     
-    String quer4 = "SELECT m.nom as machine, m.code, m.id_machine, "
+    String quer4 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -101,7 +101,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<PannesHeureReponse> Heure();
     
     
-    String quer6 = "SELECT m.nom as machine, m.code, m.id_machine, "
+    String quer6 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -118,7 +118,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     @Query( value=quer6, nativeQuery = true)
     public List<JSONObject> ToDayPannes(LocalDate date);
     
-        String quer8 = "SELECT m.nom as machine, m.code, m.id_machine, "
+        String quer8 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -136,7 +136,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     @Query( value=quer8, nativeQuery = true)
     public List<JSONObject> WeekPannes(LocalDate date, LocalDate date2);
     
-        String quer9 = "SELECT m.nom as machine, m.code, m.id_machine, "
+        String quer9 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -154,7 +154,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     @Query( value=quer9, nativeQuery = true)
     public List<JSONObject> MonthPannes(String date);
     
-    String quer10 = "SELECT m.nom as machine, m.code, m.id_machine, "
+    String quer10 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
@@ -173,7 +173,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<JSONObject> YearPannes(String date);
     
     String countAll = "SELECT distinct new com.example.demo.reponses.CountPannesResponse("
-            + "m.nom as machine, m.code, m.idMachine, count(DISTINCT p.numero) as nbre, "
+            + "m.nom as machine, m.code, m.idMachine as idM, count(DISTINCT p.numero) as nbre, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
             + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.idDepartement) "
@@ -182,14 +182,15 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
             + "JOIN p.machines m "
             + "JOIN m.lignes l "
             + "JOIN l.departement d "
+            + "WHERE date_format(p.date, '%Y/%m') = ?1 "
             + "GROUP by m.nom "
             + "order by nbre desc";
   
     @Query( value=countAll)
-    public List<CountPannesResponse> TotalLPannes();
+    public List<CountPannesResponse> TotalLPannes(String date);
     
     String countAllDepPanne = "SELECT distinct new com.example.demo.reponses.CountPannesResponse("
-            + "m.nom as machine, m.code, m.idMachine, count(DISTINCT p.numero) as nbre, "
+            + "m.nom as machine, m.code, m.idMachine as idM, count(DISTINCT p.numero) as nbre, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
             + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.idDepartement) "
@@ -205,7 +206,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<CountPannesResponse> TotallDepPannes();
     
     String countDay = "SELECT distinct new com.example.demo.reponses.CountPannesResponse("
-            + "m.nom as machine, m.code, m.idMachine, count(DISTINCT p.numero) as nbre, "
+            + "m.nom as machine, m.code, m.idMachine as idM, count(DISTINCT p.numero) as nbre, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
             + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.idDepartement) "

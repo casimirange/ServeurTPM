@@ -8,7 +8,7 @@ package com.example.demo.Controller;
 import com.example.demo.entity.Lignes;
 import com.example.demo.entity.Role;
 import com.example.demo.repository.LigneRepository;
-import com.example.demo.repository.RoleRepository;
+//import com.example.demo.repository.RoleRepository;
 import com.example.demo.service.RoleService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

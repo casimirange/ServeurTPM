@@ -22,14 +22,14 @@ public class ServeurTpmApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ctx = SpringApplication.run(ServeurTpmApplication.class, args);
 		
-		//initialiser la base de données
-		//DepartementRepository departementRepository = ctx.getBean(DepartementRepository.class);
-		
-		//departementRepository.save(new Departement("Brazil", "B350", "Ivan POMPEI"));
-		//departementRepository.save(new Departement("Scierie", "B450", "Victor Sa'ah"));
-		//departementRepository.save(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
-		//departementRepository.save(new Departement("Placage", "B300", "Bassa Amanganga"));
-		
+//		initialiser la base de données
+//		DepartementRepository departementRepository = ctx.getBean(DepartementRepository.class);
+//		
+//		departementRepository.save(new Departement("Brazil", "B350", "Ivan POMPEI"));
+//		departementRepository.save(new Departement("Scierie", "B450", "Victor Sa'ah"));
+//		departementRepository.save(new Departement("Contreplaqué", "B520", "Kevin Tchintcheu"));
+//		departementRepository.save(new Departement("Placage", "B300", "Bassa Amanganga"));
+//		
 //		RoleRepository roleRepository = ctx.getBean(RoleRepository.class);
 //		
 //		Role roleUser = new Role(RoleEnum.ROLE_USER);

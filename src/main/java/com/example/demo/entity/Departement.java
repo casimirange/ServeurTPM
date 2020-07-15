@@ -41,14 +41,14 @@ public class Departement implements Serializable{
 	@OneToMany(mappedBy = "departement", cascade = CascadeType.ALL)
 	public List<Lignes> lignes;
 
-	/*public Departement(String nom, String centre_cout, String responsable) {
+	public Departement(String nom, String centre_cout, String responsable) {
 		super();
 		this.nom = nom;
 		this.centre_cout = centre_cout;
 		this.responsable = responsable;
 	}
 
-        
+        /*
 	public Departement(Long idDepartement, String nom, String centre_cout, String responsable, List<Lignes> lignes) {
 		super();
 		this.idDepartement = idDepartement;

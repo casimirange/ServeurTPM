@@ -24,7 +24,7 @@ import lombok.ToString;
 public class CountPannesResponse {
     private String machine;	
 	private String code;  
-        private Long idMachine;
+        private Long idM;
         private Long nbre;
         private LocalDate date;
         private String numero;
