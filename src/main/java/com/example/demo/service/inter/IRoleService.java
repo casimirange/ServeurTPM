@@ -1,17 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.example.demo.service.inter;
-
-import com.example.demo.entity.Role;
-import java.util.List;
-
-/**
- *
- * @author Casimir
- */
-public interface IRoleService {
-    public List<Role> getAllRole();
-}
+///*
+// * To change this license header, choose License Headers in Project Properties.
+// * To change this template file, choose Tools | Templates
+// * and open the template in the editor.
+// */
+//package com.example.demo.service.inter;
+//
+//import com.example.demo.entity.Role;
+//import java.util.List;
+//
+///**
+// *
+// * @author Casimir
+// */
+//public interface IRoleService {
+//    public List<Role> getAllRole();
+//}

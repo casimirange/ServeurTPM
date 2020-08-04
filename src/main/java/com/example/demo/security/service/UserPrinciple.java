@@ -5,7 +5,7 @@
 // */
 //package com.example.demo.security.service;
 //
-//import com.example.demo.entity.Utilisateurs;
+//import com.example.demo.entity.User;
 //import com.fasterxml.jackson.annotation.JsonIgnore;
 //import java.util.Collection;
 //import java.util.List;
@@ -46,14 +46,14 @@
 //        this.authorities = authorities;
 //    }
 // 
-//    public static UserPrinciple build(Utilisateurs user) {
-//        List<GrantedAuthority> authorities = user.getRole().stream().map(role ->
-//                new SimpleGrantedAuthority(role.getNom())
+//    public static UserPrinciple build(User user) {
+//        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+//                new SimpleGrantedAuthority(role.getName().name())
 //        ).collect(Collectors.toList());
 // 
 //        return new UserPrinciple(
 //                user.getId(),
-//                user.getNom(),
+//                user.getName(),
 //                user.getUsername(),
 //                user.getEmail(),
 //                user.getPassword(),

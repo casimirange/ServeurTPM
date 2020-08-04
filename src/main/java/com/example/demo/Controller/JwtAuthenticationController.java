@@ -4,9 +4,11 @@
 // * and open the template in the editor.
 // */
 //package com.example.demo.Controller;
-//import com.example.demo.config.JwtRequest;
-//import com.example.demo.config.JwtResponse;
-//import com.example.demo.config.JwtTokenUtil;
+////import com.example.demo.config.JwtRequest;
+////import com.example.demo.config.JwtResponse;
+////import com.example.demo.config.JwtTokenUtil;
+//import com.example.demo.model.JwtRequest;
+//import com.example.demo.model.JwtResponse;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.security.authentication.AuthenticationManager;
@@ -30,8 +32,8 @@
 //public class JwtAuthenticationController {
 //    @Autowired
 //    private AuthenticationManager authenticationManager;
-//    @Autowired
-//    private JwtTokenUtil jwtTokenUtil;
+////    @Autowired
+////    private JwtTokenUtil jwtTokenUtil;
 //    @Autowired
 //    private UserDetailsService userDetailsService;
 //

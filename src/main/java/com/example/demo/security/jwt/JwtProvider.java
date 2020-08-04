@@ -14,10 +14,12 @@
 //import io.jsonwebtoken.*;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
+//import org.springframework.stereotype.Component;
 ///**
 // *
 // * @author Casimir
 // */
+//@Component
 //public class JwtProvider {
 //    private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 // 

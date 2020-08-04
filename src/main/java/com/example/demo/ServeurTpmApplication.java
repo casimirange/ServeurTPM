@@ -8,11 +8,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.example.demo.entity.Departement;
-import com.example.demo.entity.Role;
-import com.example.demo.entity.Utilisateurs;
+//import com.example.demo.entity.Role;
+//import com.example.demo.entity.Utilisateurs;
 import com.example.demo.repository.DepartementRepository;
-import com.example.demo.repository.RoleRepository;
-import com.example.demo.repository.UtilisateurRepository;
+//import com.example.demo.repository.RoleRepository;
+//import com.example.demo.repository.UtilisateurRepository;
 import com.example.demo.util.RoleEnum;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

@@ -23,6 +23,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
+                
+                <!----><dependency>
+                    <groupId>org.hibernate.validator</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                    <version>6.1.5.Final</version>
+                </dependency>
 		
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -44,7 +50,13 @@
 		<dependency>
 	        <groupId>org.springframework.boot</groupId>
 	        <artifactId>spring-boot-starter-web</artifactId>
-	    </dependency>
+		 <exclusions>
+		  <exclusion>
+		   <groupId>org.hibernate.validator</groupId>
+		   <artifactId>hibernate-validator</artifactId>
+		  </exclusion>
+		 </exclusions>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -69,22 +81,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency> -->
-				<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-config -->
+				<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-config 
                 <dependency>
                     <groupId>org.springframework.security</groupId>
                     <artifactId>spring-security-config</artifactId>
                     <version>5.3.0.RELEASE</version>
-                </dependency>
+                </dependency>-->
                 
-                <!--<dependency>
+                <!----><dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>-->
+		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-		</dependency>
+		</dependency>-->
 		
                 <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
                 <dependency>
@@ -92,6 +104,18 @@
                     <artifactId>jjwt</artifactId>
                     <version>0.9.1</version>
                 </dependency>
+                
+                <dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-devtools</artifactId>
+   <scope>runtime</scope>
+   <optional>true</optional>
+</dependency>
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-websocket</artifactId>
+   <version>1.5.2.RELEASE</version>
+</dependency>
 
 		
 	</dependencies>
