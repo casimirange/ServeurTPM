@@ -60,7 +60,7 @@ public class PannesService implements IPanneService {
 		return panneRepository.Techs(numero);
 	}
         
-	public List<PannesNonAcheveesReponse> PannesNonAchevees() {
+	public List<JSONObject> PannesNonAchevees() {
 		return panneRepository.PannesNonAchevees();
 	}
 

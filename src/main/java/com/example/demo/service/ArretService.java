@@ -11,6 +11,7 @@ import com.example.demo.reponses.ArretsReponse;
 import com.example.demo.repository.ArretRepository;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.service.inter.IArretService;
+import java.util.Calendar;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,14 @@ public class ArretService implements IArretService {
     @Autowired
     private MachineRepository machineRepository;
 
+    String mts;
     @Override
     public List<Arrets> allArrets() {
         return arretRepository.findAll();
     }
 
     @Override
-    public List<ArretsReponse> toutesPannes() {
+    public List<ArretsReponse> toutesPannes() {        
         return arretRepository.TousLesArrets();
     }
 

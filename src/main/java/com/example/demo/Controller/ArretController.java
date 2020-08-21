@@ -11,7 +11,10 @@ import com.example.demo.reponses.ArretsReponse;
 import com.example.demo.repository.ArretRepository;
 import com.example.demo.service.ArretService;
 import com.example.demo.service.inter.IArretService;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.List;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RequestMapping(value = "/api/arrets")
 public class ArretController {
-    
+    String mts;
     @Autowired
     private ArretRepository arretRepository ;
     
@@ -75,7 +78,6 @@ public class ArretController {
                     arretModel.getDebutArret(), 
                     arretModel.getFinArret(), 
                     arretModel.getCause(),
-                    arretModel.isEtat(),
                     arretModel.getNumero());
             arretService.addArret(arret, arretModel.getIdMachine());
     }
@@ -87,7 +89,6 @@ public class ArretController {
                     arretModel.getDebutArret(), 
                     arretModel.getFinArret(), 
                     arretModel.getCause(),
-                    arretModel.isEtat(),
                     arretModel.getNumero());
             arretService.updateArret(arret, arretModel.getIdMachine());
     }
@@ -95,6 +96,27 @@ public class ArretController {
     @GetMapping("/{id}")
     public Arrets showArret(@PathVariable Long id) {
             return arretService.showArret(id);
+    }
+            	
+    @GetMapping("/thisMonth")
+    public List<JSONObject> showThisMonthArret() {
+        Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("ce mois: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }
+            return arretRepository.ArretThisMonth(mts);
+    }
+            	
+    @GetMapping("/today")
+    public List<JSONObject> showTodayArret() {
+        LocalDate date = LocalDate.now();
+        return arretRepository.ArretToday(date);
     }
         	
     @DeleteMapping("/{id}")

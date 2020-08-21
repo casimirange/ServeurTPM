@@ -44,6 +44,10 @@ public class PanneModel {
 	
 	boolean etat;
 	
+	boolean cont;
+        
+        int quart;
+	
 	String numero;
         
         int DT;
@@ -213,6 +217,22 @@ public class PanneModel {
 
     public void setTTR(int TTR) {
         this.TTR = TTR;
+    }
+
+    public boolean isCont() {
+        return cont;
+    }
+
+    public void setCont(boolean cont) {
+        this.cont = cont;
+    }
+
+    public int getQuart() {
+        return quart;
+    }
+
+    public void setQuart(int quart) {
+        this.quart = quart;
     }
 	
 	

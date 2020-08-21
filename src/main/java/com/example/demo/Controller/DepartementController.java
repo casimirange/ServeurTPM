@@ -174,13 +174,13 @@ public class DepartementController {
                         String m = String.valueOf(td.get("date"));
                         String x = String.valueOf(wts.get("date"));
                         String y = String.valueOf(tt.get("date"));
-                        
+//                        System.out.println("Total Down Time: "+ String.format("%.0f", td.get("TDT")));
                         if(h.equals(m) && h.equals(x) && h.equals(y)){
                             response2.put("date", h);
-                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
-                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
-                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
-                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            response2.put("nbre", nb.get("nbre"));
+                            response2.put("TDT", td.get("TDT").toString().substring(0, td.get("TDT").toString().length() - 2));
+                            response2.put("WT", wts.get("WT").toString().substring(0, wts.get("WT").toString().length() - 2));
+                            response2.put("TTR", tt.get("TTR").toString().substring(0, tt.get("TTR").toString().length() - 2));
                             json2 = new JSONObject(response2);
                         }
                         
@@ -12448,4 +12448,64 @@ System.out.println("panne ca:\n" + pby);
                     
             return MTBF2;
         }
+        
+    
+    @GetMapping("/dashboard/{dep}")
+    public List<JSONObject> test(@PathVariable Long dep){
+        date1 = LocalDate.now();
+        date2 = date1.minusMonths(1);
+        List<JSONObject> dash = new ArrayList<>();
+        List<JSONObject> test = departementRepository.dashboard(date2, date1, dep);
+        List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         
+        Map<String, Integer> result = test.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = test.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("dt")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("dt", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        
+                        if(h.equals(m)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre")));
+                            response2.put("dt", String.valueOf(td.get("dt")));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+            });
+            dash.add(json2);
+        });
+                        System.out.println("finalité \n" + dash);
+        return dash;
+    }    
 }

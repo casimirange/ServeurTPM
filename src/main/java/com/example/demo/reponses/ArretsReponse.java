@@ -32,7 +32,5 @@ public class ArretsReponse {
     private String numero;
     private String cause;
     private LocalDateTime debutArret;
-    @Column(nullable = true)
     private LocalDateTime finArret;
-    private boolean etat;
 }

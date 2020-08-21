@@ -18,6 +18,7 @@ public class PannesTechReponse {
         private String preTec;
         private Long matricule;
         private String fonction;
+        private int quart;
         
         
 }

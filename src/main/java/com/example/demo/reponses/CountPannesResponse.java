@@ -35,6 +35,8 @@ public class CountPannesResponse {
         private LocalDateTime debutInter;
         private LocalDateTime finInter;
         private boolean etat;
+        private boolean cont;
+        private int quart;
         @Column(nullable = true)
         private String outil;
         @Column(nullable = true)

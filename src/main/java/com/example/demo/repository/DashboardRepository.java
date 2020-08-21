@@ -52,7 +52,8 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     
     String countAll = "SELECT distinct new com.example.demo.reponses.CountPannesResponse("
             + "m.nom as machine, m.code, m.idMachine, count(DISTINCT p.numero) as nbre, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
             + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.idDepartement) "
             + "FROM Pannes p JOIN p.techniciens t "
@@ -77,10 +78,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     String test = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
             + "FROM Pannes where date between ?1 and ?2  GROUP by date, numero order by date asc";
-    
-//    String test = "SELECT new com.example.demo.reponses.StatsRepose("
-//            + "date, count(DISTINCT numero) as nbre, SUM(DT) as dt)"
-//            + " FROM Pannes GROUP by date order by date DESC";
+
   
     @Query(value=test, nativeQuery = true)
     public List<JSONObject> test(LocalDate date, LocalDate date2);
@@ -186,15 +184,14 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     @Query(value = pThisYear, nativeQuery = true)
     public List<JSONObject> PThisYear(String date);
     
-    String techStats = "SELECT date_format(p.date, '%b %Y') as date, m.nom, t.nom as tec, t.matricule, t.fonction,\n" +
+    String techStats = "SELECT date_format(p.date, '%b %Y') as date, t.nom as tec, t.matricule, t.fonction,\n" +
         "COUNT(DISTINCT p.numero) as nbre,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT \n" +
         "FROM pannes p\n" +
-        "inner join machines m on p.id_machine = m.id_machine\n" +
         "join techniciens t on t.id_technicien = p.id_technicien\n" +
         "WHERE date_format(p.date, '%Y/%m') = ?1\n" +
-        "GROUP BY t.nom, p.numero";
+        "GROUP BY t.nom, p.numero order by coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) desc";
   
     @Query( value=techStats, nativeQuery = true)
     public List<JSONObject> TechniciensStats(String date);

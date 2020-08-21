@@ -52,13 +52,9 @@ public class Arrets implements Serializable{
 
     private LocalDateTime debut_arret; 
 
-    @Column(nullable = true)
-    @Value("${some.key:0000-00-00 00:00:00}")
     private LocalDateTime fin_arret;
 
     private String cause;
-
-    private boolean etat;
 
     private String numero;
 
@@ -67,12 +63,11 @@ public class Arrets implements Serializable{
             // TODO Auto-generated constructor stub
     }
 
-    public Arrets(LocalDate date, LocalDateTime debut_arret, LocalDateTime fin_arret, String cause, boolean etat, String numero) {
+    public Arrets(LocalDate date, LocalDateTime debut_arret, LocalDateTime fin_arret, String cause, String numero) {
         this.date = date;
         this.debut_arret = debut_arret;
         this.fin_arret = fin_arret;
         this.cause = cause;
-        this.etat = etat;
         this.numero = numero;
     }
 
@@ -138,14 +133,6 @@ public class Arrets implements Serializable{
 
     public void setCreated_at(Date created_at) {
         this.created_at = created_at;
-    }
-
-    public boolean isEtat() {
-        return etat;
-    }
-
-    public void setEtat(boolean etat) {
-        this.etat = etat;
     }
 
     public String getNumero() {

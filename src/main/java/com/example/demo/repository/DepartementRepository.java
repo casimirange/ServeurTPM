@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Departement;
+import java.time.LocalDate;
 import java.util.List;
 import net.minidev.json.JSONObject;
 import org.springframework.data.jpa.repository.Query;
@@ -31,6 +32,16 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     
     @Query(value = pannes, nativeQuery = true)
     List<JSONObject> panneDep(Long x);
+    
+    String dashboard = "SELECT p.date, count(distinct p.numero)as nbre, "
+        + "COALESCE(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)),0) as dt "
+        + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "
+        + "JOIN lignes l on m.id_ligne = l.id_ligne "
+        + "JOIN departement d on d.id_departement = l.id_departement "
+        + "where p.date between ?1 and ?2 and d.id_departement = ?3 GROUP by date, numero order by p.date asc";
+  
+    @Query(value=dashboard, nativeQuery = true)
+    public List<JSONObject> dashboard(LocalDate date, LocalDate date2, Long x);
     
     String countDepPanne = "SELECT date_format(p.date, '%Y/%m') as date, COUNT(DISTINCT p.numero) as nbre, "
             + "SUM(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, "

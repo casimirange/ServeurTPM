@@ -32,10 +32,13 @@ public class Pannes implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idPanne;
 	
+        @Column(columnDefinition = "TEXT")
 	private String cause;
 	
+        @Column(columnDefinition = "TEXT")
 	private String details;
 	
+        @Column(columnDefinition = "TEXT")
 	private String description;
         
         @Column(nullable = true)
@@ -71,6 +74,10 @@ public class Pannes implements Serializable{
 	private Machines machines;
 	
 	private boolean etat;
+	private boolean cont;
+        
+        @Value("${some.key:1}")
+	private int quart;
 	
 	private String numero;
         private int DT;
@@ -88,57 +95,8 @@ public class Pannes implements Serializable{
 	}
 
 
-//	public Pannes(String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-//			Date debut_inter, Date fin_inter, boolean etat, int numero) {
-//		super();
-//		this.cause = cause;
-//		this.details = détails;
-//		this.description = description;
-//		this.date = date;
-//		this.heure_arret = heure_arret;
-//		this.debut_inter = debut_inter;
-//		this.fin_inter = fin_inter;
-//		this.etat = etat;
-//		this.numero = numero;
-//	}
-
-//	public Pannes(Long idPanne, String cause, String détails, String description, java.sql.Date date, Date heure_arret,
-//			Date debut_inter, Date fin_inter, Techniciens techniciens, Operateurs operateurs,
-//			Machines machines, boolean etat, int numero, Outils outils) {
-//		super();
-//		this.idPanne = idPanne;
-//		this.cause = cause;
-//		this.details = détails;
-//		this.description = description;
-//		this.date = date;
-//		this.heure_arret = heure_arret;
-//		this.debut_inter = debut_inter;
-//		this.fin_inter = fin_inter;
-//		this.techniciens = techniciens;
-//		this.operateurs = operateurs;
-//		this.machines = machines;
-//		this.etat = etat;
-//		this.numero = numero;
-//		this.outils = outils;
-//	}
-
-//    public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, int numero) {
-//        this.cause = cause;
-//        this.details = details;
-//        this.description = description;
-//        this.outil = outil;
-//        this.ref = ref;
-//        this.qte = qte;
-//        this.date = date;
-//        this.heure_arret = heure_arret;
-//        this.debut_inter = debut_inter;
-//        this.fin_inter = fin_inter;
-//        this.etat = etat;
-//        this.numero = numero;
-//    }
-
     public Pannes(String cause, String details, String description, String outil, String ref, int qte, LocalDate date, 
-            LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, String numero, int DT, int WT, int TTR) {
+            LocalDateTime heure_arret, LocalDateTime debut_inter, LocalDateTime fin_inter, boolean etat, boolean cont, int quart,  String numero, int DT, int WT, int TTR) {
         this.cause = cause;
         this.details = details;
         this.description = description;
@@ -150,6 +108,8 @@ public class Pannes implements Serializable{
         this.debut_inter = debut_inter;
         this.fin_inter = fin_inter;
         this.etat = etat;
+        this.cont = cont;
+        this.quart = quart;
         this.numero = numero;
         this.DT = DT;
         this.WT = WT;
@@ -334,6 +294,22 @@ public class Pannes implements Serializable{
 
     public void setTTR(int TTR) {
         this.TTR = TTR;
+    }
+
+    public boolean isCont() {
+        return cont;
+    }
+
+    public void setCont(boolean cont) {
+        this.cont = cont;
+    }
+
+    public int getQuart() {
+        return quart;
+    }
+
+    public void setQuart(int quart) {
+        this.quart = quart;
     }
     
 }
