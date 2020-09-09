@@ -14,7 +14,8 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
 
     String pannes = "SELECT DISTINCT "
             + "m.nom as machine, m.code, m.id_machine as idM, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
@@ -28,10 +29,93 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN departement d on d.id_departement = l.id_departement "
             + "WHERE d.id_departement = ?1 "
             + "GROUP by p.numero "
-            + "order By p.date desc, p.fin_inter desc";
+            + "order By p.date desc, p.heure_arret desc";
     
     @Query(value = pannes, nativeQuery = true)
     List<JSONObject> panneDep(Long x);
+    
+    String quer6 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat,"
+            + " p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on m.id_ligne = l.id_ligne "
+            + "JOIN departement d on d.id_departement = l.id_departement "
+            + "where p.date = ?1 and d.id_departement = ?2 "
+            + "GROUP by p.numero ";
+      
+      
+    @Query( value=quer6, nativeQuery = true)
+    public List<JSONObject> ToDayPannes(LocalDate date, Long id);
+    
+        String quer8 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on m.id_ligne = l.id_ligne "
+            + "JOIN departement d on d.id_departement = l.id_departement "
+            + "where p.date between ?1 and ?2  and d.id_departement = ?3 "
+            + "GROUP by p.numero "
+            + "order by p.date desc";
+      
+      
+    @Query( value=quer8, nativeQuery = true)
+    public List<JSONObject> WeekPannes(LocalDate date, LocalDate date2, Long id);
+    
+        String quer9 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on m.id_ligne = l.id_ligne "
+            + "JOIN departement d on d.id_departement = l.id_departement "
+            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 "
+            + "GROUP by p.numero "
+            + "order by p.date desc";
+      
+      
+    @Query( value=quer9, nativeQuery = true)
+    public List<JSONObject> MonthPannes(String date, Long id);
+    
+    String quer10 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on m.id_ligne = l.id_ligne "
+            + "JOIN departement d on d.id_departement = l.id_departement "
+    + "where DATE_FORMAT(p.date, '%Y') = ?1 and d.id_departement = ?2 "
+    + "GROUP by p.numero "
+    + "order by p.date desc";
+      
+      
+    @Query( value=quer10, nativeQuery = true)
+    public List<JSONObject> YearPannes(String date, Long id);
     
     String dashboard = "SELECT p.date, count(distinct p.numero)as nbre, "
         + "COALESCE(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)),0) as dt "
@@ -42,6 +126,16 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
   
     @Query(value=dashboard, nativeQuery = true)
     public List<JSONObject> dashboard(LocalDate date, LocalDate date2, Long x);
+    
+    String dashboardThisMonth = "SELECT p.date, count(distinct p.numero)as nbre, "
+        + "COALESCE(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)),0) as dt "
+        + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "
+        + "JOIN lignes l on m.id_ligne = l.id_ligne "
+        + "JOIN departement d on d.id_departement = l.id_departement "
+        + "where date_format(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 GROUP by date, numero order by p.date asc";
+  
+    @Query(value=dashboardThisMonth, nativeQuery = true)
+    public List<JSONObject> dashboardThisMonth(String date, Long x);
     
     String countDepPanne = "SELECT date_format(p.date, '%Y/%m') as date, COUNT(DISTINCT p.numero) as nbre, "
             + "SUM(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, "
@@ -133,18 +227,18 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = pThisYear, nativeQuery = true)
     public List<JSONObject> PThisYear(Long id, String date);
     
-    String paretoYear = "SELECT m.nom, \n" +
+    String paretoRange = "SELECT m.nom, \n" +
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
             "join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE date_format(p.date, '%Y') = ?2  and d.id_departement = ?1 \n" +
+            "WHERE p.date between ?2 and ?3 and d.id_departement = ?1 \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = paretoYear, nativeQuery = true)
-    public List<JSONObject> ParetoYear(Long id, String date);
+    @Query(value = paretoRange, nativeQuery = true)
+    public List<JSONObject> ParetoRange(Long id, LocalDate date, LocalDate date2);
     
     String paretoThisMonth = "SELECT m.nom, \n" +
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
@@ -965,17 +1059,17 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = jointageHTThisYear, nativeQuery = true) 
     public List<JSONObject> JointageHTThisYear(Long id, String date);
     
-    String DerouleuseThisYear = "SELECT \n" +
+    String DerouleuseRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'der%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'derouleuse%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = DerouleuseThisYear, nativeQuery = true) 
-    public List<JSONObject> DerParetoThisYear(String date);
+    @Query(value = DerouleuseRange, nativeQuery = true) 
+    public List<JSONObject> DerParetoRange(LocalDate date, LocalDate date2);
     
     String DerouleuseThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -983,23 +1077,23 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'der%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'derouleuse%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = DerouleuseThisMonth, nativeQuery = true) 
     public List<JSONObject> DerParetoThisMonth(String date);
     
-    String BobineuseThisYear = "SELECT \n" +
+    String BobineuseRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'bobi%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'bobineuse%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = BobineuseThisYear, nativeQuery = true) 
-    public List<JSONObject> BobParetoThisYear(String date);
+    @Query(value = BobineuseRange, nativeQuery = true) 
+    public List<JSONObject> BobParetoRange(LocalDate date, LocalDate date2);
     
     String BobineuseThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -1007,23 +1101,23 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'bobi%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'bobineuse%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = BobineuseThisMonth, nativeQuery = true) 
     public List<JSONObject> BobParetoThisMonth(String date);
     
-    String MagasinBobineThisYear = "SELECT \n" +
+    String MagasinBobineRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'magasin b%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'magasin b%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = MagasinBobineThisYear, nativeQuery = true) 
-    public List<JSONObject> MagBobParetoThisYear(String date);
+    @Query(value = MagasinBobineRange, nativeQuery = true) 
+    public List<JSONObject> MagBobParetoRange(LocalDate date, LocalDate date2);
     
     String MagasinBobineThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -1037,17 +1131,17 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = MagasinBobineThisMonth, nativeQuery = true) 
     public List<JSONObject> MagBobParetoThisMonth(String date);
     
-    String MassicotThisYear = "SELECT \n" +
+    String Massicotrange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'massicot%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'massicot%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = MassicotThisYear, nativeQuery = true) 
-    public List<JSONObject> MassicotParetoThisYear(String date);
+    @Query(value = Massicotrange, nativeQuery = true) 
+    public List<JSONObject> MassicotParetoRange(LocalDate date, LocalDate date2);
     
     String MassicotThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -1061,17 +1155,17 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = MassicotThisMonth, nativeQuery = true) 
     public List<JSONObject> MassicotParetoThisMonth(String date);
     
-    String SechoirThisYear = "SELECT \n" +
+    String SechoirRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'sechoir%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'sechoir%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = SechoirThisYear, nativeQuery = true) 
-    public List<JSONObject> SechoirParetoThisYear(String date);
+    @Query(value = SechoirRange, nativeQuery = true) 
+    public List<JSONObject> SechoirParetoRange(LocalDate date, LocalDate date2);
     
     String SechoirThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -1085,17 +1179,17 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = SechoirThisMonth, nativeQuery = true) 
     public List<JSONObject> SechoirParetoThisMonth(String date);
     
-    String TrancheuseThisYear = "SELECT \n" +
+    String TrancheuseRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'trancheuse%' and date_format(p.date, '%Y') = ?1\n" +
+        "WHERE m.nom LIKE 'trancheuse%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = TrancheuseThisYear, nativeQuery = true) 
-    public List<JSONObject> TrancheuseParetoThisYear(String date);
+    @Query(value = TrancheuseRange, nativeQuery = true) 
+    public List<JSONObject> TrancheuseParetoRange(LocalDate date, LocalDate date2);
     
     String TrancheuseThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
@@ -1109,7 +1203,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     @Query(value = TrancheuseThisMonth, nativeQuery = true) 
     public List<JSONObject> TrancheuseParetoThisMonth(String date);
     
-    String EncolleuseThisYear = "SELECT \n" +
+    String EncolleuseRange = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
@@ -1117,11 +1211,11 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n"+ 
-        "WHERE m.nom LIKE 'encolleuse%' and date_format(p.date, '%Y') = ?1 and d.id_departement = ?2\n" +
+        "WHERE m.nom LIKE 'encolleuse%' and p.date between ?1 and ?2 and d.id_departement = ?3\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = EncolleuseThisYear, nativeQuery = true) 
-    public List<JSONObject> EncolleuseParetoThisYear(String date, Long dep);
+    @Query(value = EncolleuseRange, nativeQuery = true) 
+    public List<JSONObject> EncolleuseParetoRange(LocalDate date, LocalDate date2, Long dep);
     
     String EncolleuseThisMonth = "SELECT \n" +
         "date_format(p.date, '%b') as date, \n" +

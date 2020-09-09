@@ -18,6 +18,7 @@ import com.example.demo.entity.Heures;
 import com.example.demo.entity.Pannes;
 import com.example.demo.repository.DashboardRepository;
 import com.example.demo.repository.DepartementRepository;
+import com.example.demo.repository.PanneRepository;
 import com.example.demo.service.inter.IDepartementService;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,6 +37,8 @@ import javax.xml.crypto.Data;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.util.PropertySource;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController 
 @CrossOrigin
@@ -44,6 +47,9 @@ public class DepartementController {
 	
 	@Autowired
 	private IDepartementService depService;
+        
+	@Autowired
+	private PanneRepository panneRepository;
         
         @Autowired
         private DepartementRepository departementRepository;
@@ -82,7 +88,886 @@ public class DepartementController {
 	
         @GetMapping("/pannes/{dep}")
 	public List<JSONObject> allMachinesByDepartmetn(@PathVariable Long dep){
-		return departementRepository.panneDep(dep);
+//		return departementRepository.panneDep(dep);
+                List<JSONObject> Allpannes = departementRepository.panneDep(dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+		return MTBF2;
+	}
+        
+        @GetMapping("/today/{dep}")
+	public List<JSONObject> today(@PathVariable Long dep){
+            LocalDate date = LocalDate.now();		 
+            List<JSONObject> Allpannes = departementRepository.ToDayPannes(date, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/hier/{dep}")
+	public List<JSONObject> hier(@PathVariable Long dep){
+            LocalDate date = LocalDate.now().minusDays(1);		 
+            List<JSONObject> Allpannes = departementRepository.ToDayPannes(date, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/csem/{dep}")
+	public List<JSONObject> thisWeek(@PathVariable Long dep){
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int week = cal.get(Calendar.DAY_OF_WEEK);
+            System.out.println("jour de la semaine: "+week);
+            if(week == 1){
+                date1 = LocalDate.now().minusDays(6);
+                date2 = LocalDate.now();                
+            }else if(week == 2){
+                date1 = LocalDate.now();
+                date2 = LocalDate.now().plusDays(6);                
+            }else if(week == 3){
+                date1 = LocalDate.now().minusDays(1);
+                date2 = LocalDate.now().plusDays(5);                
+            }else if(week == 4){
+                date1 = LocalDate.now().minusDays(2);
+                date2 = LocalDate.now().plusDays(4);                
+            }else if(week == 5){
+                date1 = LocalDate.now().minusDays(3);
+                date2 = LocalDate.now().plusDays(3);                
+            }else if(week == 6){
+                date1 = LocalDate.now().minusDays(4);
+                date2 = LocalDate.now().plusDays(2);                
+            }else if(week == 7){
+                date1 = LocalDate.now().minusDays(5);
+                date2 = LocalDate.now().plusDays(1);                
+            }
+            System.out.println("jour de la semaine1: "+ date1.getDayOfWeek() + date1.getDayOfMonth());
+            System.out.println("jour de la semaine7: "+ date2.getDayOfWeek() + date2.getDayOfMonth());
+            		 
+            List<JSONObject> Allpannes = departementRepository.WeekPannes(date1, date2, dep);
+            System.out.println("all :" + Allpannes);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/semp/{dep}")
+	public List<JSONObject> lastWeek(@PathVariable Long dep){
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int week = cal.get(Calendar.DAY_OF_WEEK);
+            if(week == 1){
+                date1 = LocalDate.now().minusDays(13);
+                date2 = LocalDate.now().minusDays(7);                
+            }else if(week == 2){
+                date1 = LocalDate.now().minusDays(7);
+                date2 = LocalDate.now().minusDays(1);                
+            }else if(week == 3){
+                date1 = LocalDate.now().minusDays(8);
+                date2 = LocalDate.now().minusDays(2);                
+            }else if(week == 4){
+                date1 = LocalDate.now().minusDays(9);
+                date2 = LocalDate.now().minusDays(3);                
+            }else if(week == 5){
+                date1 = LocalDate.now().minusDays(10);
+                date2 = LocalDate.now().minusDays(4);                
+            }else if(week == 6){
+                date1 = LocalDate.now().minusDays(11);
+                date2 = LocalDate.now().minusDays(5);                
+            }else if(week == 7){
+                date1 = LocalDate.now().minusDays(12);
+                date2 = LocalDate.now().minusDays(6);                
+            }
+            System.out.println("jour de la semaine passée1: "+ date1.getDayOfWeek() + date1.getDayOfMonth());
+            System.out.println("jour de la semaine^passée7: "+ date2.getDayOfWeek() + date2.getDayOfMonth());
+            
+            List<JSONObject> Allpannes = departementRepository.WeekPannes(date1, date2, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+            
+	}
+        
+        @GetMapping("/Date_range/{dep}")
+	public List<JSONObject> dateRange(@PathVariable Long dep, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){            
+//            return panneRepository.WeekPannes(date1, date2);
+            List<JSONObject> Allpannes = departementRepository.WeekPannes(date1, date2, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+                
+        @GetMapping("/thisMonth/{dep}")
+	public List<JSONObject> thisMonth(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("ce mois: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }            
+            
+//		return panneRepository.MonthPannes(mts);
+            List<JSONObject> Allpannes = departementRepository.MonthPannes(mts, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/lastMonth/{dep}")
+	public List<JSONObject> lastMonth(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
+            System.out.println("mois passé: "+ mts);
+//		return panneRepository.MonthPannes(mts);
+                List<JSONObject> Allpannes = departementRepository.MonthPannes(mts, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/thisYear/{dep}")
+	public List<JSONObject> thisYear(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int year = cal.get(Calendar.YEAR);
+            String mt = String.valueOf(year);
+            System.out.println("année: "+ year);
+            
+//		return panneRepository.YearPannes(mt);
+                List<JSONObject> Allpannes = departementRepository.YearPannes(mt, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/lastYear/{dep}")
+	public List<JSONObject> lastYear(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int year = cal.get(Calendar.YEAR);
+            String mt = String.valueOf(year-1);
+            System.out.println("an passé: "+ mt);
+//		return panneRepository.YearPannes(mt);
+                List<JSONObject> Allpannes = departementRepository.YearPannes(mt, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
 	}
         
         @GetMapping("/pannes/countThisMonth/{dep}")
@@ -1156,16 +2041,12 @@ List<JSONObject> MTBF = new ArrayList<>();
         return test7;
     }    
         
-        @GetMapping("/paretoDepYear/{dep}")
-        public List<JSONObject> ParetoThisYear(@PathVariable Long dep){
-
-            Calendar cal = Calendar.getInstance();
-            cal.setFirstDayOfWeek(0);
-            int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);                      
+        @GetMapping("/paretoDepRange/{dep}")
+        public List<JSONObject> ParetoThisYear(@PathVariable Long dep, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){                   
 
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.ParetoYear(dep, mts);
+            List<JSONObject> pty = departementRepository.ParetoRange(dep, date1, date2);
             
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -1235,6 +2116,89 @@ List<JSONObject> MTBF = new ArrayList<>();
             System.out.println("this month: "+ mts);
             }else{
                 mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }                     
+
+            List<JSONObject> pty = departementRepository.ParetoThisMonth(dep, mts);
+            List<JSONObject> MTBF = new ArrayList<>();
+            
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> test3 = new ArrayList<>();
+         LinkedHashSet<JSONObject> test0 = new LinkedHashSet<>();
+         List<JSONObject> test4 = new ArrayList<>(); 
+         LinkedHashSet<JSONObject> test1 = new LinkedHashSet<>(); 
+         List<JSONObject> test5 = new ArrayList<>();
+         List<JSONObject> test2 = new ArrayList<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         LinkedHashSet<JSONObject> test7 = new LinkedHashSet<>();
+         List<JSONObject> test6 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;            
+        }
+        
+        @GetMapping("/paretoDepLastMonth/{dep}")
+        public List<JSONObject> ParetoLastMonth(@PathVariable Long dep){
+
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }                     
 
             List<JSONObject> pty = departementRepository.ParetoThisMonth(dep, mts);
@@ -9759,16 +10723,12 @@ System.out.println("panne ca:\n" + pby);
         return test7;
     }
         
-        @GetMapping("/paretoDerouleuseTDTThisYear")
-        public List<JSONObject> DerouleuseParetoTDTThisYear(){
-
-            Calendar cal = Calendar.getInstance();
-            cal.setFirstDayOfWeek(0);
-            int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+        @GetMapping("/paretoDerouleuseTDTRange")
+        public List<JSONObject> DerouleuseParetoTDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){       
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.DerParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.DerParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -9899,17 +10859,87 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoDerouleuseMDTThisYear")
-        public List<JSONObject> DerouleuseParetoMDTThisYear(){
+        @GetMapping("/paretoDerouleuseTDTLastMonth")
+        public List<JSONObject> DerouleuseParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
+            
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.DerParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoDerouleuseMDTRange")
+        public List<JSONObject> DerouleuseParetoMDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+    
             
             List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.DerParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.DerParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -10143,16 +11173,137 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        @GetMapping("/paretoBobineuseTDTThisYear")
-        public List<JSONObject> BobineuseParetoTDTThisYear(){
+        @GetMapping("/paretoDerouleuseMDTLastMonth")
+        public List<JSONObject> DerouleuseParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.BobParetoThisYear(mts);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.DerParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        @GetMapping("/paretoBobineuseTDTRange")
+        public List<JSONObject> BobineuseParetoTDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){    
+            
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.BobParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -10283,17 +11434,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoBobineuseMDTThisYear")
-        public List<JSONObject> BobineuseParetoMDTThisYear(){
+        @GetMapping("/paretoBobineuseTDTLastMonth")
+        public List<JSONObject> BobineuseParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.BobParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoBobineuseMDTRange")
+        public List<JSONObject> BobineuseParetoMDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.BobParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.BobParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -10527,16 +11747,137 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        @GetMapping("/paretoMagasinBobineTDTThisYear")
-        public List<JSONObject> MagasinBobineParetoTDTThisYear(){
+        @GetMapping("/paretoBobineuseMDTLastMonth")
+        public List<JSONObject> BobineuseParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.MagBobParetoThisYear(mts);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.BobParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        @GetMapping("/paretoMagasinBobineTDTRange")
+        public List<JSONObject> MagasinBobineParetoTDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MagBobParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -10667,17 +12008,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoMagasinBobineMDTThisYear")
-        public List<JSONObject> MagasinBobineParetoMDTThisYear(){
+        @GetMapping("/paretoMagasinBobineTDTLastMonth")
+        public List<JSONObject> MagasinBobineParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MagBobParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoMagasinBobineMDTRange")
+        public List<JSONObject> MagasinBobineParetoMDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.MagBobParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.MagBobParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -10911,16 +12321,137 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        @GetMapping("/paretoMassicotTDTThisYear")
-        public List<JSONObject> MassicotParetoTDTThisYear(){
+        @GetMapping("/paretoMagasinBobineMDTLastMonth")
+        public List<JSONObject> MagasinBobineParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.MassicotParetoThisYear(mts);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MagBobParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        @GetMapping("/paretoMassicotTDTRange")
+        public List<JSONObject> MassicotParetoTDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MassicotParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -11051,17 +12582,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoMassicotMDTThisYear")
-        public List<JSONObject> MassicotParetoMDTThisYear(){
+        @GetMapping("/paretoMassicotTDTLastMonth")
+        public List<JSONObject> MassicotParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MassicotParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoMassicotMDTRange")
+        public List<JSONObject> MassicotParetoMDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.MassicotParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.MassicotParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -11295,17 +12895,138 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        
-        @GetMapping("/paretoSechoirTDTThisYear")
-        public List<JSONObject> SechoirParetoTDTThisYear(){
+        @GetMapping("/paretoMassicotMDTLastMonth")
+        public List<JSONObject> MassicotParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.SechoirParetoThisYear(mts);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.MassicotParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        
+        @GetMapping("/paretoSechoirTDTRange")
+        public List<JSONObject> SechoirParetoTDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.SechoirParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -11436,17 +13157,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoSechoirMDTThisYear")
-        public List<JSONObject> SechoirParetoMDTThisYear(){
+        @GetMapping("/paretoSechoirTDTLastMonth")
+        public List<JSONObject> SechoirParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.SechoirParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoSechoirMDTRange")
+        public List<JSONObject> SechoirParetoMDTRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.SechoirParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.SechoirParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -11680,16 +13470,137 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        @GetMapping("/paretoTrancheuseTDTThisYear")
-        public List<JSONObject> TrancheuseParetoTDTThisYear(){
+        @GetMapping("/paretoSechoirMDTLastMonth")
+        public List<JSONObject> SechoirParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.TrancheuseParetoThisYear(mts);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.SechoirParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        @GetMapping("/paretoTrancheuseTDTRange")
+        public List<JSONObject> TrancheuseParetoTDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.TrancheuseParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -11820,17 +13731,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoTrancheuseMDTThisYear")
-        public List<JSONObject> TrancheuseParetoMDTThisYear(){
+        @GetMapping("/paretoTrancheuseTDTLastMonth")
+        public List<JSONObject> TrancheuseParetoTDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.TrancheuseParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoTrancheuseMDTRange")
+        public List<JSONObject> TrancheuseParetoMDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.TrancheuseParetoThisYear(mts);
+            List<JSONObject> pty = departementRepository.TrancheuseParetoRange(date1, date2);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -12064,17 +14044,138 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
-        
-        @GetMapping("/paretoEncolleuseTDTThisYear/{dep}")
-        public List<JSONObject> EncolleuseParetoTDTThisYear(@PathVariable Long dep){
+        @GetMapping("/paretoTrancheuseMDTLastMonth")
+        public List<JSONObject> TrancheuseParetoMDTLastMonth(){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.EncolleuseParetoThisYear(mts, dep);
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.TrancheuseParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
+        
+        @GetMapping("/paretoEncolleuseTDTRange/{dep}")
+        public List<JSONObject> EncolleuseParetoTDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2, @PathVariable Long dep){
+
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.EncolleuseParetoRange(date1, date2, dep);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
@@ -12205,17 +14306,86 @@ System.out.println("panne ca:\n" + pby);
             return MTBF;
         }
         
-        @GetMapping("/paretoEncolleuseMDTThisYear/{dep}")
-        public List<JSONObject> EncolleuseParetoMDTThisYear(@PathVariable Long dep){
+        @GetMapping("/paretoEncolleuseTDTLastMonth/{dep}")
+        public List<JSONObject> EncolleuseParetoTDTLastMonth(@PathVariable Long dep){
 
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            mts = String.valueOf(year);         
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
             
             List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.EncolleuseParetoThisMonth(mts, dep);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+        
+        @GetMapping("/paretoEncolleuseMDTRange/{dep}")
+        public List<JSONObject> EncolleuseParetoMDTThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2, @PathVariable Long dep){
+
+            List<JSONObject> MTBF = new ArrayList<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
-            List<JSONObject> pty = departementRepository.EncolleuseParetoThisYear(mts, dep);
+            List<JSONObject> pty = departementRepository.EncolleuseParetoRange(date1, date2, dep);
 
             Map<String,Object> response = new HashMap<>();
          Map<String,Object> response2 = new HashMap<>();
@@ -12449,6 +14619,131 @@ System.out.println("panne ca:\n" + pby);
             return MTBF2;
         }
         
+        @GetMapping("/paretoEncolleuseMDTLastMonth/{dep}")
+        public List<JSONObject> EncolleuseParetoMDTLastMonth(@PathVariable Long dep){
+
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
+            
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            List<JSONObject> pty = departementRepository.EncolleuseParetoThisMonth(mts, dep);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,Object> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> nbre2 = new ArrayList<>();
+         List<JSONObject> tdth2 = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", date.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", dates.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth.add(json);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", Integer.parseInt(td.get("nbre").toString()));
+                            response.put("MDT", Double.parseDouble(nb.get("TDT").toString())/Double.parseDouble(td.get("nbre").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                        
+        
+                        
+        Map<String, Integer> result2 = MTBF.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((Integer)t.get("nbre")).intValue()))); 
+        
+        result2.entrySet().stream()
+            .forEach(dater -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dater.getKey());
+            response2.put("nbre", dater.getValue().intValue());
+            json2 = new JSONObject(response2);
+            nbre2.add(json2);            
+            });
+        
+        System.out.println("nbre2\n " + nbre2);
+        
+        Map<String, Double> tdtd2 = MTBF.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((Double)g.get("MDT")).doubleValue()))); 
+        
+        tdtd2.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates2 -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates2.getKey());
+            response2.put("MDT", dates2.getValue().intValue());
+            json = new JSONObject(response2);
+            tdth2.add(json);            
+            });
+        System.out.println("trdt2\n " + tdth);
+        
+        tdth2.forEach(nb->{
+            nbre2.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("MDT", (nb.get("MDT").toString()));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF2.add(json2);
+        });
+                        System.out.println("final2 \n" + MTBF2);                
+                    
+            return MTBF2;
+        }
+        
     
     @GetMapping("/dashboard/{dep}")
     public List<JSONObject> test(@PathVariable Long dep){
@@ -12456,6 +14751,201 @@ System.out.println("panne ca:\n" + pby);
         date2 = date1.minusMonths(1);
         List<JSONObject> dash = new ArrayList<>();
         List<JSONObject> test = departementRepository.dashboard(date2, date1, dep);
+        List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         
+        Map<String, Integer> result = test.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = test.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("dt")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("dt", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        
+                        if(h.equals(m)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre")));
+                            response2.put("dt", String.valueOf(td.get("dt")));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+            });
+            dash.add(json2);
+        });
+                        System.out.println("finalité \n" + dash);
+        return dash;
+    }    
+    
+    @GetMapping("/dashboardRange/{dep}")
+    public List<JSONObject> dashboardRange(@PathVariable Long dep, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        
+        List<JSONObject> dash = new ArrayList<>();
+        List<JSONObject> test = departementRepository.dashboard(date1, date2, dep);
+        List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         
+        Map<String, Integer> result = test.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = test.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("dt")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("dt", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        
+                        if(h.equals(m)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre")));
+                            response2.put("dt", String.valueOf(td.get("dt")));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+            });
+            dash.add(json2);
+        });
+                        System.out.println("finalité \n" + dash);
+        return dash;
+    }    
+    
+    @GetMapping("/dashboardThisMonth/{dep}")
+    public List<JSONObject> dashboardThisMonth(@PathVariable Long dep){
+        Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }
+            
+        List<JSONObject> dash = new ArrayList<>();
+        List<JSONObject> test = departementRepository.dashboardThisMonth(mts, dep);
+        List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         
+        Map<String, Integer> result = test.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = test.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("dt")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("dt", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        
+                        if(h.equals(m)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre")));
+                            response2.put("dt", String.valueOf(td.get("dt")));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+            });
+            dash.add(json2);
+        });
+                        System.out.println("finalité \n" + dash);
+        return dash;
+    }    
+    
+    @GetMapping("/dashboardLastMonth/{dep}")
+    public List<JSONObject> dashboardLastMonth(@PathVariable Long dep){
+        Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
+            
+        List<JSONObject> dash = new ArrayList<>();
+        List<JSONObject> test = departementRepository.dashboardThisMonth(mts, dep);
         List<JSONObject> nbre = new ArrayList<>();
          List<JSONObject> tdth = new ArrayList<>();
          Map<String,String> response2 = new HashMap<>();

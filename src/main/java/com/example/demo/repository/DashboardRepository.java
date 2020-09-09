@@ -50,23 +50,21 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     @Query(value=countAllDepPanne)
     public List<DashboardResponse> countPerDay(LocalDate date, LocalDate date2);
     
-    String countAll = "SELECT distinct new com.example.demo.reponses.CountPannesResponse("
-            + "m.nom as machine, m.code, m.idMachine, count(DISTINCT p.numero) as nbre, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
-            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
-            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.idDepartement) "
-            + "FROM Pannes p JOIN p.techniciens t "
-            + "JOIN p.operateurs o "
-            + "JOIN p.machines m "
-            + "JOIN m.lignes l "
-            + "JOIN l.departement d "
+    String countAll = "SELECT "
+            + "count(DISTINCT p.numero) as nbre, d.nom as dep, d.id_departement, "
+            + "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT "
+            + "FROM pannes p "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on l.id_ligne = m.id_ligne "
+            + "JOIN departement d on d.id_departement = l.id_departement "
             + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 "
+//            + "and p.dt > 15 "
+//            + "and m.label = 'correctif' "
             + "GROUP by d.nom "
             + "order by nbre desc";
   
-    @Query( value=countAll)
-    public List<CountPannesResponse> TotalLPannes(String date);
+    @Query( value=countAll, nativeQuery = true)
+    public List<JSONObject> TotalLPannes(String date);
     
     String countThisYear = "SELECT count(DISTINCT p.numero) as nbre "
             + "FROM Pannes p "
@@ -75,13 +73,21 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     @Query( value=countThisYear, nativeQuery = true)
     public List<JSONObject> countThisYear(String date);
     
-    String test = "SELECT date, count(distinct numero)as nbre, "
+    String countLast30Day = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
             + "FROM Pannes where date between ?1 and ?2  GROUP by date, numero order by date asc";
 
   
-    @Query(value=test, nativeQuery = true)
+    @Query(value=countLast30Day, nativeQuery = true)
     public List<JSONObject> test(LocalDate date, LocalDate date2);
+    
+    String countMonthPanne = "SELECT date, count(distinct numero)as nbre, "
+            + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
+            + "FROM Pannes where DATE_FORMAT(date, '%Y/%m') = ?1 GROUP by date, numero order by date asc";
+
+  
+    @Query(value=countMonthPanne, nativeQuery = true)
+    public List<JSONObject> countMonthPanne(String date);
     
     
     String mdtyear = "SELECT date_format(p.date, '%Y') as date, "
@@ -195,5 +201,17 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
   
     @Query( value=techStats, nativeQuery = true)
     public List<JSONObject> TechniciensStats(String date);
+    
+    String techStatsrange = "SELECT date_format(p.date, '%b %Y') as date, t.nom as tec, t.matricule, t.fonction,\n" +
+        "COUNT(DISTINCT p.numero) as nbre,\n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT \n" +
+        "FROM pannes p\n" +
+        "join techniciens t on t.id_technicien = p.id_technicien\n" +
+        "WHERE p.date between ?1 and ?2\n" +
+        "GROUP BY t.nom, p.numero order by coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) desc";
+  
+    @Query( value=techStatsrange, nativeQuery = true)
+    public List<JSONObject> TechniciensStatsRange(LocalDate date1, LocalDate date2);
     
 }

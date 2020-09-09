@@ -627,8 +627,7 @@ public class PanneController {
              
 		return MTBF2;
 	}
-        
-        
+                
         @GetMapping("/thisMonth")
 	public List<JSONObject> thisMonth(){
             Calendar cal = Calendar.getInstance();
@@ -1002,8 +1001,8 @@ public class PanneController {
 		return panneRepository.PannesNonAchevees();
 	} 
         
-        @GetMapping("/count")
-        public List<JSONObject> countAll(){
+        @GetMapping("/countThisMonth")
+        public List<JSONObject> countAllThisMonth(){
             Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
@@ -1015,6 +1014,28 @@ public class PanneController {
                 mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
             }
             return panneRepository.TotalLPannes(mts);
+        } 
+        
+        @GetMapping("/countLastMonth")
+        public List<JSONObject> countAllLastMonth(){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("ce mois: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
+            return panneRepository.TotalLPannes(mts);
+        } 
+        
+        @GetMapping("/countRangeMonth")
+        public List<JSONObject> countAllRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+            
+            return panneRepository.TotalRangePannes(date1, date2);
         } 
         
         @GetMapping("/countDep")

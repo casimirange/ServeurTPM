@@ -6,11 +6,12 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.entity.Lignes;
 import com.example.demo.reponses.LignesReponse;
+import net.minidev.json.JSONObject;
 
 @Component
 public interface ILigneService {
 
-	public List<LignesReponse> allLignes();
+	public List<JSONObject> allLignes();
 	
 	public Lignes findBy(Long id);
 	

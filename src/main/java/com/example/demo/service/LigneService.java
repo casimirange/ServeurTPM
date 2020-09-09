@@ -11,6 +11,7 @@ import com.example.demo.reponses.LignesReponse;
 import com.example.demo.repository.DepartementRepository;
 import com.example.demo.repository.LigneRepository;
 import com.example.demo.service.inter.ILigneService;
+import net.minidev.json.JSONObject;
 
 @Service
 public class LigneService implements ILigneService {
@@ -39,7 +40,7 @@ public class LigneService implements ILigneService {
 	}
 
 	@Override
-	public List<LignesReponse> allLignes() {
+	public List<JSONObject> allLignes() {
 		return ligneRepository.ToutesLesLignes();
 	}
 

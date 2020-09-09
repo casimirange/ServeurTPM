@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Machines;
+import java.time.LocalDate;
 import java.util.List;
 import net.minidev.json.JSONObject;
 import org.springframework.data.jpa.repository.Query;
@@ -22,8 +23,9 @@ public interface MachineRepository extends JpaRepository<Machines, Long> {
     List<JSONObject> machDep(Long x);
     
     String historiquePannes = "SELECT DISTINCT "
-            + "m.nom as machine, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, p.outil, p.ref, p.qte, "
+            + "m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
@@ -35,10 +37,85 @@ public interface MachineRepository extends JpaRepository<Machines, Long> {
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "WHERE m.id_machine = ?1 "
             + "GROUP by p.numero "
-            + "order By p.date desc, p.fin_inter desc";
+            + "order By p.date desc, p.heure_arret desc";
     
     @Query(value = historiquePannes, nativeQuery = true)
     List<JSONObject> historiquePannes(Long x);
+    
+    String quer6 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat,"
+            + " p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "where p.date = ?1 and m.id_machine = ?2 "
+            + "GROUP by p.numero ";
+      
+      
+    @Query( value=quer6, nativeQuery = true)
+    public List<JSONObject> ToDayPannes(LocalDate date, Long id);
+    
+        String quer8 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "where p.date between ?1 and ?2  and m.id_machine = ?3 "
+            + "GROUP by p.numero "
+            + "order by p.date desc";
+      
+      
+    @Query( value=quer8, nativeQuery = true)
+    public List<JSONObject> WeekPannes(LocalDate date, LocalDate date2, Long id);
+    
+        String quer9 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 and m.id_machine = ?2 "
+            + "GROUP by p.numero "
+            + "order by p.date desc";
+      
+      
+    @Query( value=quer9, nativeQuery = true)
+    public List<JSONObject> MonthPannes(String date, Long id);
+    
+    String quer10 = "SELECT m.nom as machine, m.code, m.id_machine as idM, "
+            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
+            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
+            + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
+            + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
+            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
+            + "JOIN machines m on p.id_machine = m.id_machine "
+    + "where DATE_FORMAT(p.date, '%Y') = ?1 and m.id_machine = ?2 "
+    + "GROUP by p.numero "
+    + "order by p.date desc";
+      
+      
+    @Query( value=quer10, nativeQuery = true)
+    public List<JSONObject> YearPannes(String date, Long id);
     
     String hourThisMonthMachine = "SELECT SUM(h.heure) as heure, m.nom "
             + "FROM heures h "

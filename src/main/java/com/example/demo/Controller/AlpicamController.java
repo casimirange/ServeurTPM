@@ -25,10 +25,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -46,13 +48,40 @@ public class AlpicamController {
     JSONObject json, json2, json3, json4;
     LocalDate date1, date2 ;
     
-    @GetMapping("/typePanneThisYear")
-    public List<JSONObject> countThisYear(){
+    @GetMapping("/typePanneThisMonth")
+    public List<JSONObject> countThisMonth(){
         Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-                mts = String.valueOf(year);
-        return alpicamRepository.typePanne(mts);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }    
+        return alpicamRepository.typePanneMonth(mts);
+    }
+    
+    @GetMapping("/typePanneLastMonth")
+    public List<JSONObject> countLastMonth(){
+        Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }    
+        return alpicamRepository.typePanneMonth(mts);
+    }
+    
+    @GetMapping("/typePanneRange")
+    public List<JSONObject> countRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        return alpicamRepository.typePanneRange(date1, date2);
     }
     
     @GetMapping("/alpiThisYear")
@@ -12937,105 +12966,18 @@ public class AlpicamController {
     }
     
  
-    @GetMapping("/paretoAlpiYear/{dep}")
-    public List<JSONObject> ParetoThisYear(@PathVariable Long dep){
-
-        Calendar cal = Calendar.getInstance();
-        cal.setFirstDayOfWeek(0);
-        int year = cal.get(Calendar.YEAR);
-        mts = String.valueOf(year);                      
+    @GetMapping("/paretoAlpiRange")
+    public List<JSONObject> ParetoThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
 
         List<JSONObject> MTBF = new ArrayList<>();
-        List<JSONObject> pty = alpicamRepository.ParetoYear(dep, mts);
+            List<JSONObject> pty = alpicamRepository.ParetoRange(date1, date2);
 
-        Map<String,Object> response = new HashMap<>();
-     Map<String,String> response2 = new HashMap<>();
-
-     List<JSONObject> nbre = new ArrayList<>();
-     List<JSONObject> tdth = new ArrayList<>();
-
-    Map<String, Integer> result = pty.stream().collect(
-        Collectors.groupingBy(e -> e.get("nom").toString(),
-        LinkedHashMap::new,
-        Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
-
-    result.entrySet().stream()
-        .forEach(date -> {
-//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
-        response2.put("nom", date.getKey());
-        response2.put("nbre", String.valueOf(date.getValue()));
-        json2 = new JSONObject(response2);
-        nbre.add(json2);            
-        });
-
-    System.out.println("nbre\n " + nbre);
-
-    Map<String, Double> tdtd = pty.stream().collect(
-        Collectors.groupingBy(f -> f.get("nom").toString(),
-        LinkedHashMap::new,
-        Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
-
-    tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .forEach(dates -> {
-//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
-        response2.put("nom", dates.getKey());
-        response2.put("TDT", String.valueOf(dates.getValue()));
-        json2 = new JSONObject(response2);
-        tdth.add(json2);            
-        });
-    System.out.println("trdt\n " + tdth);
-
-    tdth.forEach(nb->{
-        nbre.forEach(td->{
-                    String h = String.valueOf(nb.get("nom"));
-                    String m = String.valueOf(td.get("nom"));
-
-                    if(h.equals(m) ){
-                        response.put("nom", h);
-                        response.put("nbre", String.valueOf(td.get("nbre")));
-                        response.put("TDT", String.valueOf(nb.get("TDT")));
-                        json2 = new JSONObject(response);
-                    }
-        });
-        MTBF.add(json2);
-    });
-                    System.out.println("final \n" + MTBF);
-
-        return MTBF;
-    }
-
-    @GetMapping("/paretoAlpiThisMonth/{dep}")
-    public List<JSONObject> ParetoThisMonth(@PathVariable Long dep){
-
-            Calendar cal = Calendar.getInstance();
-            cal.setFirstDayOfWeek(0);
-            int month = cal.get(Calendar.MONTH);
-            int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
-            System.out.println("this month: "+ mts);
-            }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
-            }                     
-
-            List<JSONObject> pty = alpicamRepository.ParetoThisMonth(dep, mts);
-            List<JSONObject> MTBF = new ArrayList<>();
-            
             Map<String,Object> response = new HashMap<>();
          Map<String,String> response2 = new HashMap<>();
          
-         List<JSONObject> test3 = new ArrayList<>();
-         LinkedHashSet<JSONObject> test0 = new LinkedHashSet<>();
-         List<JSONObject> test4 = new ArrayList<>(); 
-         LinkedHashSet<JSONObject> test1 = new LinkedHashSet<>(); 
-         List<JSONObject> test5 = new ArrayList<>();
-         List<JSONObject> test2 = new ArrayList<>();
          List<JSONObject> nbre = new ArrayList<>();
          List<JSONObject> tdth = new ArrayList<>();
-         List<JSONObject> wth = new ArrayList<>();
-         List<JSONObject> ttrh = new ArrayList<>();
-         LinkedHashSet<JSONObject> test7 = new LinkedHashSet<>();
-         List<JSONObject> test6 = new ArrayList<>();
          
         Map<String, Integer> result = pty.stream().collect(
             Collectors.groupingBy(e -> e.get("nom").toString(),
@@ -13084,6 +13026,308 @@ public class AlpicamController {
         });
                         System.out.println("final \n" + MTBF);
                     
-            return MTBF;            
+            return MTBF;
+    }
+
+    @GetMapping("/paretoAlpiThisMonth")
+    public List<JSONObject> ParetoThisMonth(){
+
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }         
+            
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = alpicamRepository.ParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
         }
+
+    @GetMapping("/paretoAlpiLastMonth")
+    public List<JSONObject> ParetoLastMonth(){
+
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+            System.out.println("this month: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }         
+            
+            List<JSONObject> MTBF = new ArrayList<>();
+            List<JSONObject> pty = alpicamRepository.ParetoThisMonth(mts);
+
+            Map<String,Object> response = new HashMap<>();
+         Map<String,String> response2 = new HashMap<>();
+         
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         
+        Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        System.out.println("nbre\n " + nbre);
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("nom").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("nom", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        System.out.println("trdt\n " + tdth);
+        
+        tdth.forEach(nb->{
+            nbre.forEach(td->{
+                        String h = String.valueOf(nb.get("nom"));
+                        String m = String.valueOf(td.get("nom"));
+                        
+                        if(h.equals(m) ){
+                            response.put("nom", h);
+                            response.put("nbre", String.valueOf(td.get("nbre")));
+                            response.put("TDT", String.valueOf(nb.get("TDT")));
+                            json2 = new JSONObject(response);
+                        }
+            });
+            MTBF.add(json2);
+        });
+                        System.out.println("final \n" + MTBF);
+                    
+            return MTBF;
+        }
+    
+    @GetMapping("/recapPanne")
+    public List<JSONObject> Recap(){
+        List<JSONObject> pty = alpicamRepository.RecapPanne();
+        List<JSONObject> MTBF = new ArrayList<>();            
+        List<JSONObject> MTBF2 = new ArrayList<>();            
+        Map<String,Object> response = new HashMap<>();
+        
+        Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         Map<String, Integer> result = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pty.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pty.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+          
+        
+        for (int i = 0; i < MTBF.size()-1; i++){
+            double x = (Integer.parseInt(MTBF.get(i).get("nbre").toString()));
+            double y = (Integer.parseInt(MTBF.get(i+1).get("nbre").toString()));
+            double x1 = (Double.parseDouble(MTBF.get(i).get("TDT").toString()));
+            double y1 = (Double.parseDouble(MTBF.get(i+1).get("TDT").toString()));
+            double x2 = (Double.parseDouble(MTBF.get(i).get("TTR").toString()));
+            double y2 = (Double.parseDouble(MTBF.get(i+1).get("TTR").toString()));
+            double x3 = (Double.parseDouble(MTBF.get(i).get("WT").toString()));
+            double y3 = (Double.parseDouble(MTBF.get(i+1).get("WT").toString()));
+            
+//            response.put("annee", pty.get(i).get("annee"));
+            response.put("date", MTBF.get(i).get("date"));
+            response.put("nbre", MTBF.get(i).get("nbre"));
+            response.put("TDT", MTBF.get(i).get("TDT"));
+            response.put("TTR", MTBF.get(i).get("TTR"));
+            response.put("WT", MTBF.get(i).get("WT"));
+            if(x==0 && y==0)
+            response.put("taux", 0);
+            if(x==0 && y!=0)
+            response.put("taux", -100);
+            if(x!=0 && y==0)
+            response.put("taux", 100);
+            if(x!=0 && y!=0)
+            response.put("taux", ((x/y)-1)*100);
+            
+            if(x1==0 && y1==0)
+            response.put("taux_TDT", 0);
+            if(x1==0 && y1!=0)
+            response.put("taux_TDT", -100);
+            if(x1!=0 && y1==0)
+            response.put("taux_TDT", 100);
+            if(x1!=0 && y1!=0)
+            response.put("taux_TDT", ((x1/y1)-1)*100);
+            
+            if(x2==0 && y2==0)
+            response.put("taux_TTR", 0);
+            if(x2==0 && y2!=0)
+            response.put("taux_TTR", -100);
+            if(x2!=0 && y2==0)
+            response.put("taux_TTR", 100);
+            if(x2!=0 && y2!=0)
+            response.put("taux_TTR", ((x2/y2)-1)*100);
+            
+            if(x3==0 && y3==0)
+            response.put("taux_WT", 0);
+            if(x3==0 && y3!=0)
+            response.put("taux_WT", -100);
+            if(x3!=0 && y3==0)
+            response.put("taux_WT", 100);
+            if(x3!=0 && y3!=0)
+            response.put("taux_WT", ((x3/y3)-1)*100);
+            
+            json = new JSONObject(response);
+            MTBF2.add(json);
+            
+        }
+        System.out.println("récapitulatif: \n" + MTBF2);
+        
+        return MTBF2.subList(0, 6);
+    }
 }

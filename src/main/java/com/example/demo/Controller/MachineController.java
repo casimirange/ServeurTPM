@@ -22,6 +22,7 @@ import com.example.demo.entity.Operateurs;
 import com.example.demo.model.LigneModel;
 import com.example.demo.model.MachineModel;
 import com.example.demo.repository.MachineRepository;
+import com.example.demo.repository.PanneRepository;
 import com.example.demo.service.inter.IMachineService;
 import com.example.demo.service.inter.IOperateurService;
 import java.math.BigDecimal;
@@ -37,6 +38,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minidev.json.JSONObject;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin
@@ -51,6 +54,9 @@ public class MachineController {
         
         @Autowired
 	private MachineRepository machineRepository;
+        
+        @Autowired
+	private PanneRepository panneRepository;
 	
 	@GetMapping
 	public List<Machines> getMachines(){
@@ -88,7 +94,886 @@ public class MachineController {
         
         @GetMapping("/pannes/{dep}")
 	public List<JSONObject> historiquePannesMachines(@PathVariable Long dep){
-		return machineRepository.historiquePannes(dep);
+//		return machineRepository.historiquePannes(dep);
+                List<JSONObject> Allpannes = machineRepository.historiquePannes(dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+		return MTBF2;
+	}
+        
+        @GetMapping("/today/{dep}")
+	public List<JSONObject> today(@PathVariable Long dep){
+            LocalDate date = LocalDate.now();		 
+            List<JSONObject> Allpannes = machineRepository.ToDayPannes(date, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/hier/{dep}")
+	public List<JSONObject> hier(@PathVariable Long dep){
+            LocalDate date = LocalDate.now().minusDays(1);		 
+            List<JSONObject> Allpannes = machineRepository.ToDayPannes(date, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/csem/{dep}")
+	public List<JSONObject> thisWeek(@PathVariable Long dep){
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int week = cal.get(Calendar.DAY_OF_WEEK);
+            System.out.println("jour de la semaine: "+week);
+            if(week == 1){
+                date1 = LocalDate.now().minusDays(6);
+                date2 = LocalDate.now();                
+            }else if(week == 2){
+                date1 = LocalDate.now();
+                date2 = LocalDate.now().plusDays(6);                
+            }else if(week == 3){
+                date1 = LocalDate.now().minusDays(1);
+                date2 = LocalDate.now().plusDays(5);                
+            }else if(week == 4){
+                date1 = LocalDate.now().minusDays(2);
+                date2 = LocalDate.now().plusDays(4);                
+            }else if(week == 5){
+                date1 = LocalDate.now().minusDays(3);
+                date2 = LocalDate.now().plusDays(3);                
+            }else if(week == 6){
+                date1 = LocalDate.now().minusDays(4);
+                date2 = LocalDate.now().plusDays(2);                
+            }else if(week == 7){
+                date1 = LocalDate.now().minusDays(5);
+                date2 = LocalDate.now().plusDays(1);                
+            }
+            System.out.println("jour de la semaine1: "+ date1.getDayOfWeek() + date1.getDayOfMonth());
+            System.out.println("jour de la semaine7: "+ date2.getDayOfWeek() + date2.getDayOfMonth());
+            		 
+            List<JSONObject> Allpannes = machineRepository.WeekPannes(date1, date2, dep);
+            System.out.println("all :" + Allpannes);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/semp/{dep}")
+	public List<JSONObject> lastWeek(@PathVariable Long dep){
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int week = cal.get(Calendar.DAY_OF_WEEK);
+            if(week == 1){
+                date1 = LocalDate.now().minusDays(13);
+                date2 = LocalDate.now().minusDays(7);                
+            }else if(week == 2){
+                date1 = LocalDate.now().minusDays(7);
+                date2 = LocalDate.now().minusDays(1);                
+            }else if(week == 3){
+                date1 = LocalDate.now().minusDays(8);
+                date2 = LocalDate.now().minusDays(2);                
+            }else if(week == 4){
+                date1 = LocalDate.now().minusDays(9);
+                date2 = LocalDate.now().minusDays(3);                
+            }else if(week == 5){
+                date1 = LocalDate.now().minusDays(10);
+                date2 = LocalDate.now().minusDays(4);                
+            }else if(week == 6){
+                date1 = LocalDate.now().minusDays(11);
+                date2 = LocalDate.now().minusDays(5);                
+            }else if(week == 7){
+                date1 = LocalDate.now().minusDays(12);
+                date2 = LocalDate.now().minusDays(6);                
+            }
+            System.out.println("jour de la semaine passée1: "+ date1.getDayOfWeek() + date1.getDayOfMonth());
+            System.out.println("jour de la semaine^passée7: "+ date2.getDayOfWeek() + date2.getDayOfMonth());
+            
+            List<JSONObject> Allpannes = machineRepository.WeekPannes(date1, date2, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+            
+	}
+        
+        @GetMapping("/Date_range/{dep}")
+	public List<JSONObject> dateRange(@PathVariable Long dep, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){            
+//            return panneRepository.WeekPannes(date1, date2);
+            List<JSONObject> Allpannes = machineRepository.WeekPannes(date1, date2, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+                
+        @GetMapping("/thisMonth/{dep}")
+	public List<JSONObject> thisMonth(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
+            System.out.println("ce mois: "+ mts);
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
+            }            
+            
+//		return panneRepository.MonthPannes(mts);
+            List<JSONObject> Allpannes = machineRepository.MonthPannes(mts, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/lastMonth/{dep}")
+	public List<JSONObject> lastMonth(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int month = cal.get(Calendar.MONTH);
+            int year = cal.get(Calendar.YEAR);
+            if(month < 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
+            }else{
+                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
+            System.out.println("mois passé: "+ mts);
+//		return panneRepository.MonthPannes(mts);
+                List<JSONObject> Allpannes = machineRepository.MonthPannes(mts, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/thisYear/{dep}")
+	public List<JSONObject> thisYear(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int year = cal.get(Calendar.YEAR);
+            String mt = String.valueOf(year);
+            System.out.println("année: "+ year);
+            
+//		return panneRepository.YearPannes(mt);
+                List<JSONObject> Allpannes = machineRepository.YearPannes(mt, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
+	}
+        
+        @GetMapping("/lastYear/{dep}")
+	public List<JSONObject> lastYear(@PathVariable Long dep){
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int year = cal.get(Calendar.YEAR);
+            String mt = String.valueOf(year-1);
+            System.out.println("an passé: "+ mt);
+//		return panneRepository.YearPannes(mt);
+                List<JSONObject> Allpannes = machineRepository.YearPannes(mt, dep);
+            Map<String, Object> response2 = new HashMap<>();
+            List<JSONObject> MTBF2 = new ArrayList<>();
+            Allpannes.forEach(t -> {
+                String numero = t.get("numero").toString();
+                List<JSONObject> Endpannes = panneRepository.Heures(numero);
+                List<JSONObject> Causepannes = panneRepository.Details(numero);
+                System.out.println("taille :" + Endpannes.size());
+                        if (Endpannes.size() == 2){
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", Causepannes.get(1).get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", Endpannes.get(0).get("heure_arret"));
+                    response2.put("debut_inter", Endpannes.get(0).get("debut_inter"));
+                    response2.put("fin_inter", Endpannes.get(1).get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", Causepannes.get(1).get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                        }
+                        else {
+                    response2.put("machine", t.get("machine"));
+                    response2.put("code", t.get("code"));
+                    response2.put("idM", t.get("idM"));
+                    response2.put("date", t.get("date"));
+                    response2.put("numero", t.get("numero"));
+                    response2.put("cause", t.get("cause"));
+                    response2.put("description", t.get("description"));
+                    response2.put("details", t.get("details"));
+                    response2.put("heure_arret", t.get("heure_arret"));
+                    response2.put("debut_inter", t.get("debut_inter"));
+                    response2.put("fin_inter", t.get("fin_inter"));
+                    response2.put("etat", t.get("etat"));
+                    response2.put("cont", t.get("cont"));
+                    response2.put("quart", t.get("quart"));
+                    response2.put("outil", t.get("outil"));
+                    response2.put("ref", t.get("ref"));
+                    response2.put("qte", t.get("qte"));
+                    response2.put("wt", t.get("wt"));
+                    response2.put("ttr", t.get("ttr"));
+                    response2.put("dt", t.get("dt"));
+                    response2.put("nomOP", t.get("nomOP"));
+                    response2.put("prenomOP", t.get("prenomOP"));
+                    response2.put("matOP", t.get("matOP"));
+                    response2.put("nomTec", t.get("nomTec"));
+                    response2.put("preTec", t.get("preTec"));
+                    response2.put("matricule", t.get("matricule"));
+                    response2.put("fonction", t.get("fonction"));
+                    json = new JSONObject(response2);
+                }
+                
+                MTBF2.add(json);
+                
+            });
+             
+		return MTBF2;
 	}
         
         @GetMapping("/hour/LastMonth/{dep}")

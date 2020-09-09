@@ -28,13 +28,13 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)) as wt, "
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as ttr, "
             + "sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)) as dt, "
-            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction "
+            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, o.id_operateur as idOperateur, "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, t.id_technicien "
             + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
             + "JOIN operateurs o on p.id_operateur = o.id_operateur "
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "GROUP by p.numero "
-            + "order By p.date desc, p.fin_inter desc";
+            + "order By p.date desc, p.heure_arret desc";
   
     @Query( value=quer1, nativeQuery = true)
     public List<JSONObject> ToutesLesPannes();
@@ -207,23 +207,24 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<JSONObject> YearPannes(String date);
     
     String countAll = "SELECT distinct "
-            + "m.nom as machine, m.code, m.id_machine as idM, count(DISTINCT p.numero) as nbre, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
-            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
-            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.id_departement "
-            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
-            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
-            + "JOIN machines m on p.id_machine = m.id_machine "
-            + "JOIN lignes l on m.id_ligne = l.id_ligne "
-            + "JOIN departement d on l.id_departement = d.id_departement "
-            
+            + "m.nom as machine, m.code, count(DISTINCT p.numero) as nbre "
+            + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "            
             + "WHERE date_format(p.date, '%Y/%m') = ?1 "
             + "GROUP by m.nom "
             + "order by nbre desc";
   
     @Query( value=countAll, nativeQuery = true)
     public List<JSONObject> TotalLPannes(String date);
+    
+    String countAllRange = "SELECT distinct "
+            + "m.nom as machine, m.code, count(DISTINCT p.numero) as nbre "
+            + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "            
+            + "WHERE p.date between ?1 and ?2 "
+            + "GROUP by m.nom "
+            + "order by nbre desc";
+  
+    @Query( value=countAllRange, nativeQuery = true)
+    public List<JSONObject> TotalRangePannes(LocalDate date1, LocalDate date2);
     
     String countAllDepPanne = "SELECT distinct "
             + "m.nom as machine, m.code, m.id_machine as idM, count(DISTINCT p.numero) as nbre, "
@@ -243,16 +244,8 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     public List<JSONObject> TotallDepPannes();
     
     String countDay = "SELECT distinct "
-            + "m.nom as machine, m.code, m.id_machine as idM, count(DISTINCT p.numero) as nbre, "
-            + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
-            + "p.cont, p.quart, p.outil, p.ref, p.qte, "
-            + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, "
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, d.nom as dep, d.id_departement "
-            + "FROM Pannes p JOIN Techniciens t on p.id_technicien = t.id_technicien "
-            + "JOIN operateurs o on p.id_operateur = o.id_operateur "
-            + "JOIN machines m on p.id_machine = m.id_machine "
-            + "JOIN lignes l on m.id_ligne = l.id_ligne "
-            + "JOIN departement d on l.id_departement = d.id_departement "
+            + "m.nom as machine, m.code, count(DISTINCT p.numero) as nbre "
+            + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "
             + "where p.date = ?1 "
             + "GROUP by m.nom "
             + "order by nbre desc";

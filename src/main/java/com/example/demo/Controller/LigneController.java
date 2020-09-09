@@ -20,6 +20,7 @@ import com.example.demo.model.LigneModel;
 import com.example.demo.reponses.LignesReponse;
 import com.example.demo.repository.LigneRepository;
 import com.example.demo.service.inter.ILigneService;
+import net.minidev.json.JSONObject;
 
 @RestController 
 @CrossOrigin
@@ -38,7 +39,7 @@ public class LigneController {
 	}
 	
 	@GetMapping()
-	public List<LignesReponse> ToutesLesLignes(){
+	public List<JSONObject> ToutesLesLignes(){
 		return ligneRepository.ToutesLesLignes();
 	}
 	
@@ -56,7 +57,9 @@ public class LigneController {
 	
 	@PutMapping
 	public ResponseEntity<String> updateLignes(@RequestBody LigneModel ligneModel) {
-		Lignes ligne = new Lignes(ligneModel.getNomLigne());
+		Lignes ligne = new Lignes();
+                ligne = ligneService.findBy(ligneModel.getIdLigne());
+                ligne.setNomLigne(ligneModel.getNomLigne());
 		ligneService.updateLigne(ligne, ligneModel.getIdDepartement());
 		return new ResponseEntity<>("sss",HttpStatus.ACCEPTED);
 	}

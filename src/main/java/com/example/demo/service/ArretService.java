@@ -13,6 +13,7 @@ import com.example.demo.repository.MachineRepository;
 import com.example.demo.service.inter.IArretService;
 import java.util.Calendar;
 import java.util.List;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,7 @@ public class ArretService implements IArretService {
     }
 
     @Override
-    public List<ArretsReponse> toutesPannes() {        
+    public List<JSONObject> toutesPannes() {        
         return arretRepository.TousLesArrets();
     }
 

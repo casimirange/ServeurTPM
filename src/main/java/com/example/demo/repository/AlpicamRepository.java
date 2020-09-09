@@ -22,12 +22,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
     
-    String query = "SELECT distinct t.fonction, COUNT(DISTINCT p.numero) as nbre "
+    String typePanneMonth = "SELECT distinct t.fonction, COUNT(DISTINCT p.numero) as nbre "
             + "FROM pannes p JOIN techniciens t on p.id_technicien = t.id_technicien "
-            + "WHERE date_format(p.date, '%Y') = ?1 GROUP by t.fonction";
+            + "WHERE date_format(p.date, '%Y/%m') = ?1 GROUP by t.fonction";
     
-    @Query(value=query, nativeQuery = true)
-    public List<JSONObject> typePanne(String date);
+    @Query(value=typePanneMonth, nativeQuery = true)
+    public List<JSONObject> typePanneMonth(String date);
+    
+    String typePanneRange = "SELECT distinct t.fonction, COUNT(DISTINCT p.numero) as nbre "
+            + "FROM pannes p JOIN techniciens t on p.id_technicien = t.id_technicien "
+            + "WHERE p.date between ?1 and ?2 GROUP by t.fonction";
+    
+    @Query(value=typePanneRange, nativeQuery = true)
+    public List<JSONObject> typePanneRange(LocalDate date, LocalDate date2);
     
     String alpi = "SELECT date_format(p.date, '%b %Y') as date,\n" +
         "COUNT(DISTINCT p.numero) as nbre,\n" +
@@ -691,29 +698,40 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
     @Query(value = PSimi, nativeQuery = true)
     List<JSONObject> statsPresseSimi(LocalDate date, LocalDate date2);
     
-    String paretoYear = "SELECT m.nom, \n" +
+    String paretoRange = "SELECT m.nom, \n" +
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
             "join machines m on m.id_machine = p.id_machine\n" +
-            "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
-            "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE date_format(p.date, '%Y') = ?1 \n" +
+            "WHERE p.date between ?1 and ?2 \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
-    @Query(value = paretoYear, nativeQuery = true)
-    public List<JSONObject> ParetoYear(Long id, String date);
+    @Query(value = paretoRange, nativeQuery = true)
+    public List<JSONObject> ParetoRange(LocalDate date, LocalDate date2);
     
     String paretoThisMonth = "SELECT m.nom, \n" +
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
             "join machines m on m.id_machine = p.id_machine\n" +
-            "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
-            "join departement d on d.id_departement = l.id_departement \n" +
             "WHERE date_format(p.date, '%Y/%m') = ?1 \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = paretoThisMonth, nativeQuery = true)
-    public List<JSONObject> ParetoThisMonth(Long id, String date);
+    public List<JSONObject> ParetoThisMonth(String date);
+    
+    String recapPanne = "SELECT date_format(h.date, '%Y %M') as date, \n" +
+        "COUNT(DISTINCT p.numero) as nbre, \n" +            
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT, \n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
+        "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
+        "from heures h\n" +
+        "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+        "GROUP by date_format(h.date, '%y%M'), p.numero \n" +
+        "order by h.date desc \n" ;
+    
+    @Query(value = recapPanne, nativeQuery = true)
+    public List<JSONObject> RecapPanne();
+    
+    
 }

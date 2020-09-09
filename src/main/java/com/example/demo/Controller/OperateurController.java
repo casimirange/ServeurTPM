@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Operateurs;
+import com.example.demo.repository.OperateurRepository;
 import com.example.demo.service.inter.IOperateurService;
+import net.minidev.json.JSONObject;
 
 @RestController 
 @CrossOrigin
@@ -24,9 +26,12 @@ public class OperateurController {
 	@Autowired
 	private IOperateurService opService;
 	
+	@Autowired
+	private OperateurRepository operateurRepository;
+	
 	@GetMapping
-	public List<Operateurs> getOperateurs(){
-		return opService.allOperateurs();
+	public List<JSONObject> getOperateurs(){
+		return operateurRepository.operateurs();
 	}
 	
 	@GetMapping("/{id}")
