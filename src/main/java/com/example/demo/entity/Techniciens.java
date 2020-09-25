@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.springframework.beans.factory.annotation.Value;
 
 //import org.hibernate.validator.constraints.UniqueElements;
 
@@ -30,7 +31,11 @@ public class Techniciens implements Serializable{
 	private String prenom;
 	
 	private String fonction;    
-        	
+	
+        @Column(columnDefinition="varchar(20) default 'bonaberi'")
+	private String localisation;    
+        
+        @Column(columnDefinition = "BIT default true", length = 1)
 	private boolean etat;
 	
 	@Column(unique = true)
@@ -44,11 +49,12 @@ public class Techniciens implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Techniciens(String nom, String prenom, String fonction, Long matricule, boolean etat) {
+	public Techniciens(String nom, String prenom, String fonction, String localisation, Long matricule, boolean etat) {
 		super();
 		this.nom = nom;
 		this.prenom = prenom;
 		this.fonction = fonction;
+		this.localisation = localisation;
 		this.matricule = matricule;
                 this.etat = etat;
 	}
@@ -117,6 +123,14 @@ public class Techniciens implements Serializable{
 
         public void setEtat(boolean etat) {
             this.etat = etat;
+        }
+
+        public String getLocalisation() {
+            return localisation;
+        }
+
+        public void setLocalisation(String localisation) {
+            this.localisation = localisation;
         }
 
 	@Override

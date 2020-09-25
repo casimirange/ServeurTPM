@@ -21,7 +21,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface PanneRepository extends JpaRepository<Pannes, Long> {
     
-    String quer1 = "SELECT "
+    String quer1 = "SELECT p.id_panne, "
             + "m.nom as machine, m.code, m.id_machine as idM, "
             + "p.date, p.numero, p.cause, p.description, p.details, p.heure_arret, p.debut_inter, p.fin_inter, p.etat, "
             + "p.cont, p.quart, p.outil, p.ref, p.qte, "
@@ -39,16 +39,15 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     @Query( value=quer1, nativeQuery = true)
     public List<JSONObject> ToutesLesPannes();
         
-    String quer2 = "SELECT new com.example.demo.reponses.PannesTechReponse("
-            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, p.quart) "
-            + "FROM Pannes p JOIN p.techniciens t "
+    String quer2 = "SELECT distinct "
+            + "t.nom as nomTec, t.prenom as preTec, t.matricule, t.fonction, p.quart, t.id_technicien, p.id_panne "
+            + "FROM Pannes p JOIN techniciens t on p.id_technicien = t.id_technicien "
             + "where p.numero = ?1";
   
-    //String quer2 = "SELECT new LignesReponse(nomLigne) FROM lignes";
-    @Query( value=quer2)
-    public List<PannesTechReponse> Techs(String numero);
+    @Query( value=quer2, nativeQuery = true)
+    public List<JSONObject> Techs(String numero);
         
-    String operateur = "SELECT distinct "
+    String operateur = "SELECT distinct o.id_Operateur as idOP, "
             + "o.nom as nomOP, o.prenom as prenomOP, o.matricule as matOP, p.quart "
             + "FROM Pannes p JOIN operateurs o on p.id_operateur = o.id_operateur  "
             + "where p.numero = ?1";
@@ -94,6 +93,7 @@ public interface PanneRepository extends JpaRepository<Pannes, Long> {
     JSONObject findPanne(String numero);
     
     List<Pannes> findByNumero(String numero);
+    List<Pannes> findByNumeroAndQuart(String numero, int quart);
     
     String quer5 = "SELECT distinct "
             + "p.heure_arret, p.debut_inter, p.fin_inter, p.numero "

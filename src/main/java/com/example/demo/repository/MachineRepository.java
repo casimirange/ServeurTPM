@@ -179,4 +179,25 @@ public interface MachineRepository extends JpaRepository<Machines, Long> {
     
     @Query(value = pThisYear, nativeQuery = true)
     public List<JSONObject> PThisYear(Long id, String date);
+    
+    Machines findByCode(String matricule);
+    Machines findByIdMachine(Long matricule);
+    
+    String active = "SELECT m.etat, m.centre_cout, m.code, m.nom, m.label, m.id_machine as idMachine, l.nom_ligne, l.id_ligne as idLigne FROM Machines m "
+            + "join lignes l on l.id_ligne = m.id_ligne where etat = 1 and localisation = 'bonaberi' order by nom asc";
+    
+    String desactive = "SELECT m.etat, m.centre_cout, m.code, m.nom, m.label, m.id_machine as idMachine, l.nom_ligne, l.id_ligne as idLigne FROM Machines m "
+            + "join lignes l on l.id_ligne = m.id_ligne where etat = 0 and localisation = 'bonaberi' order by nom asc";
+    
+    String all = "SELECT m.etat, m.centre_cout, m.code, m.nom, m.label, m.id_machine as idMachine, l.nom_ligne, l.id_ligne as idLigne FROM Machines m "
+            + "join lignes l on l.id_ligne = m.id_ligne where localisation = 'bonaberi' order by nom asc";
+  
+    @Query(nativeQuery = true, value=active)
+    public List<JSONObject> ActivatedMachine();
+    
+    @Query(nativeQuery = true, value=desactive)
+    public List<JSONObject> DesactivatedMachine();
+    
+    @Query(nativeQuery = true, value=all)
+    public List<JSONObject> AllMachine();
 }

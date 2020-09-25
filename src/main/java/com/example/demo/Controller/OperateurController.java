@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Operateurs;
+import com.example.demo.entity.Techniciens;
+import com.example.demo.model.OperateurModel;
 import com.example.demo.repository.OperateurRepository;
 import com.example.demo.service.inter.IOperateurService;
 import net.minidev.json.JSONObject;
@@ -33,6 +35,28 @@ public class OperateurController {
 	public List<JSONObject> getOperateurs(){
 		return operateurRepository.operateurs();
 	}
+        
+        @GetMapping("/active")
+	public List<JSONObject> activeTech(){
+		return operateurRepository.ActivatedOp();
+	}
+        
+        @GetMapping("/desactive")
+	public List<JSONObject> desactiveTech(){
+		return operateurRepository.DesactivatedOp();
+	}
+        
+        @PutMapping("/{matricule}")
+	public void desactiveOperateur(@PathVariable Long matricule) {
+	    Operateurs tech = new Operateurs();
+        tech = operateurRepository.findByMatricule(matricule);
+        if(tech.isEtat()){
+            tech.setEtat(false);
+        }else{
+            tech.setEtat(true);
+        }
+            opService.updateOperateur(tech);
+	}
 	
 	@GetMapping("/{id}")
 	public Operateurs getById(@PathVariable Long id){
@@ -41,12 +65,20 @@ public class OperateurController {
 	
 	@PostMapping
 	public void addOperateur(@RequestBody Operateurs operateur) {
+            operateur.setEtat(true);
 		opService.addOperateur(operateur);
 	}
 	
 	@PutMapping
-	public void updateOperateur(@RequestBody Operateurs operateur) {
-		opService.updateOperateur(operateur);
+	public void updateOperateur(@RequestBody OperateurModel machineModel) {
+            Operateurs machine = new Operateurs();
+                machine = opService.findOne(machineModel.getIdOP());
+                machine.setNom(machineModel.getNomOP());
+                machine.setMatricule(machineModel.getMatOP());
+                machine.setPrenom(machineModel.getPrenomOP());                
+                machine.setEtat(machineModel.isEtat());
+                machine.setLocalisation("bonaberi");
+		opService.updateOperateur(machine);
 	}
 	
 	@DeleteMapping("/{matricule}")

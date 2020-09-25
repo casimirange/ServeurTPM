@@ -7,11 +7,7 @@ import com.example.demo.entity.Techniciens;
 public interface ITechnicienService {
 
 	public List<Techniciens> allTechniciens();
-        
-        public List<Techniciens> allActiveTech();
-        
-        public List<Techniciens> allDesactiveTech();
-	
+        	
 	public Techniciens findOne(Long id);
         
         public Techniciens findByMat(Long matricule);

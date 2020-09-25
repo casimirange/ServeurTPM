@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Techniciens;
+import com.example.demo.model.TechnicienModel;
 import com.example.demo.repository.TechnicienRepository;
 import com.example.demo.service.inter.ITechnicienService;
+import net.minidev.json.JSONObject;
 
 @RestController 
 @CrossOrigin
@@ -29,18 +31,18 @@ public class TechnicienController {
         private TechnicienRepository technicienRepository;
 	
 	@GetMapping
-	public List<Techniciens> getTechniciens(){
-		return techService.allTechniciens();
+	public List<JSONObject> getTechniciens(){
+		return technicienRepository.AllTech();
 	}
         
         @GetMapping("/active")
-	public List<Techniciens> activeTech(){
-		return techService.allActiveTech();
+	public List<JSONObject> activeTech(){
+		return technicienRepository.ActivatedTech();
 	}
         
         @GetMapping("/desactive")
-	public List<Techniciens> desactiveTech(){
-		return techService.allDesactiveTech();
+	public List<JSONObject> desactiveTech(){
+		return technicienRepository.DesactivatedTech();
 	}
 	
 	@GetMapping("/{matricule}")
@@ -55,8 +57,16 @@ public class TechnicienController {
 	}
 	
 	@PutMapping
-	public void updateTechnicien(@RequestBody Techniciens technicien) {
-		techService.updateTech(technicien);
+	public void updateTechnicien(@RequestBody TechnicienModel technicienModel) {
+            Techniciens technicien = new Techniciens();
+            technicien = techService.findOne(technicienModel.getIdTechnicien());
+            technicien.setNom(technicienModel.getNom());
+            technicien.setMatricule(technicienModel.getMatricule());
+            technicien.setFonction(technicienModel.getFonction());
+            technicien.setPrenom(technicienModel.getPrenom());                
+            technicien.setEtat(technicienModel.isEtat());
+            technicien.setLocalisation("bonaberi");
+            techService.updateTech(technicien);
 	}
 	
 	@DeleteMapping("/{matricule}")

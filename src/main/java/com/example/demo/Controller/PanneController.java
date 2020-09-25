@@ -1,8 +1,9 @@
 package com.example.demo.Controller;
 
+import com.example.demo.entity.Machines;
+import com.example.demo.entity.Operateurs;
 import java.util.List;
 
-import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,33 +18,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.entity.Lignes;
 import com.example.demo.entity.Pannes;
-import com.example.demo.model.LigneModel;
+import com.example.demo.entity.Techniciens;
+import com.example.demo.helper.panExcelHelper;
+import com.example.demo.message.response.ResponseMessage;
 import com.example.demo.model.PanneModel;
 //import com.example.demo.reponses.CountPannesResponse;
-import com.example.demo.reponses.LignesReponse;
-import com.example.demo.reponses.PSR;
-import com.example.demo.reponses.PannesNonAcheveesReponse;
-import com.example.demo.reponses.PannesReponse;
 import com.example.demo.reponses.PannesHeureReponse;
 import com.example.demo.reponses.PannesTechReponse;
 import com.example.demo.repository.PanneRepository;
+import com.example.demo.service.ExcelService;
 import com.example.demo.service.PannesService;
 import com.example.demo.service.inter.IPanneService;
 import java.time.LocalDate;
-import java.time.Month;
-import static java.time.temporal.TemporalQueries.zone;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import net.minidev.json.JSONObject;
+import org.springframework.boot.autoconfigure.web.ServerProperties.Tomcat.Resource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController 
 @CrossOrigin
@@ -56,6 +58,8 @@ public class PanneController {
         private PannesService ps;
         @Autowired
         private PanneRepository panneRepository;
+        @Autowired
+        ExcelService fileService;
         
         LocalDate date1, date2 ;
         JSONObject json, json2, json3, json4;
@@ -144,7 +148,7 @@ public class PanneController {
 	}
         
         @GetMapping("/tech/{numero}")
-	public List<PannesTechReponse> findTechByNum(@PathVariable String numero){
+	public List<JSONObject> findTechByNum(@PathVariable String numero){
 		return panneRepository.Techs(numero);
 	}
         
@@ -1072,7 +1076,194 @@ public class PanneController {
 	
 	@PutMapping
 	public ResponseEntity<Pannes> continuePanne(@RequestBody PanneModel panneModel) {
-		Pannes panne = new Pannes(
+            List<Pannes> pan = new ArrayList<Pannes>();
+            pan = panneRepository.findByNumero(panneModel.getNumero());
+            Pannes panne = new Pannes();
+            for(int i = 0; i< pan.size(); i++){
+                panne = pan.get(i);
+                panne.setCause(panneModel.getCause());
+                panne.setDetails(panneModel.getDetails());
+                panne.setDescription(panneModel.getDescription());
+                panne.setOutil(panneModel.getOutil());
+                panne.setRef(panneModel.getRef());
+                panne.setQte(panneModel.getQte());
+                panne.setDate(panneModel.getDate());
+                panne.setHeure_arret(panneModel.getHeureArret());
+                panne.setDebut_inter(panneModel.getDebutInter());
+                panne.setFin_inter(panneModel.getFinInter());
+                panne.setEtat(panneModel.isEtat());
+                panne.setCont(panneModel.isCont());
+                panne.setQuart(panneModel.getQuart());
+                
+                panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
+            }
+//		Pannes pannes = new Pannes(
+//                        panneModel.getCause(), 
+//                        panneModel.getDetails(), 
+//                        panneModel.getDescription(), 
+//                        panneModel.getOutil(),
+//                        panneModel.getRef(),
+//                        panneModel.getQte(),
+//                        panneModel.getDate(), 
+//                        panneModel.getHeureArret(), 
+//                        panneModel.getDebutInter(), 
+//                        panneModel.getFinInter(), 
+//                        panneModel.isEtat(), 
+//                        panneModel.isCont(),
+//                        panneModel.getQuart(),
+//                        panneModel.getNumero(),
+//                        panneModel.getDT(),
+//                        panneModel.getWT(),
+//                        panneModel.getTTR()
+//                );
+//		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
+
+		return new ResponseEntity<>(panne,HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/{numero}")
+	public void deletePanne(@PathVariable String numero) {
+            List<Pannes> pan = new ArrayList<>();
+            pan = panneRepository.findByNumero(numero);
+            for(int i=0; i< pan.size(); i++){                
+                panneRepository.delete(pan.get(i));
+            }
+	}
+	
+	@DeleteMapping("/tech/{idPanne}")
+	public void deleteTechnicienPanne(@PathVariable Long idPanne) {
+            Pannes pan = panneService.findOne(idPanne);              
+                panneRepository.delete(pan);
+	}
+        
+        @PutMapping("/{numero}")
+	public void activePanne(@PathVariable String numero) {
+	    List<Pannes> pan = new ArrayList<>();            
+            for(int i=0; i< panneRepository.findByNumero(numero).size(); i++){
+                pan = panneRepository.findByNumero(numero);
+                if(!pan.get(i).isEtat()){
+                    pan.get(i).setEtat(true); 
+                }
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/etat/{numero}")
+	public void updateEtatPanne(@PathVariable String numero) {
+	    List<Pannes> pan = new ArrayList<>();            
+            for(int i=0; i< panneRepository.findByNumero(numero).size(); i++){
+                pan = panneRepository.findByNumero(numero);
+                if(!pan.get(i).isEtat()){
+                    pan.get(i).setEtat(true); 
+                    pan.get(i).setCont(true);
+                }else{
+                    pan.get(i).setEtat(false); 
+                    pan.get(i).setCont(false);
+                }
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/periode/{numero}/{quart}")
+	public void updatePériodePanne(@PathVariable String numero,@PathVariable int quart, 
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam("heureArret") LocalDateTime heureArret,
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam("debutInter") LocalDateTime debutInter,
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam("finInter") LocalDateTime finInter
+        ) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart);         
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setHeure_arret(heureArret);
+                    pan.get(i).setDebut_inter(debutInter);
+                    pan.get(i).setFin_inter(finInter);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/outils/{numero}/{quart}")
+	public void updateOutilsPanne(@PathVariable String numero,@PathVariable int quart, 
+                @RequestParam("outil") String outil,
+                @RequestParam("qte") int qte,
+                @RequestParam("ref") String ref
+        ) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart);         
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setOutil(outil);
+                    pan.get(i).setQte(qte);
+                    pan.get(i).setRef(ref);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/date/{numero}")
+	public void updateDatePanne(@PathVariable String numero, 
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("date") LocalDate date
+        ) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumero(numero);         
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setDate(date);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/description/{numero}")
+	public void updateDescriptionPanne(@PathVariable String numero, @RequestParam("description") String description) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumero(numero);         
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setDescription(description);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/cause/{numero}/{quart}")
+	public void updateCausePanne(@PathVariable String numero, @PathVariable int quart, @RequestParam("cause") String cause) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart);              
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setCause(cause);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/details/{numero}/{quart}")
+	public void updateDetailsPanne(@PathVariable String numero, @PathVariable int quart, @RequestParam("details") String details) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart);            
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setDetails(details);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/operateur/{numero}/{quart}")
+	public void updateOperateurPanne(@PathVariable String numero, @PathVariable int quart, @RequestParam("operateur") Operateurs op) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart);            
+            for(int i=0; i< pan.size(); i++){ 
+                    pan.get(i).setOperateurs(op);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PutMapping("/machine/{numero}")
+	public void updateMachinePanne(@PathVariable String numero, @RequestParam("machine") Machines mach) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumero(numero);            
+            for(int i=0; i< pan.size(); i++){ 
+                pan.get(i).setMachines(mach);
+                panneRepository.save(pan.get(i));
+            }        
+	}
+        
+        @PostMapping("/technicien/{numero}/{quart}")
+	public void addTechnicienPanne(@PathVariable String numero, @PathVariable int quart, @RequestParam("tec") Techniciens tec) {
+	    List<Pannes> pan = new ArrayList<>();   
+            pan = panneRepository.findByNumeroAndQuart(numero, quart); 
+            Pannes panneModel = pan.get(0);
+            Pannes panne = new Pannes(
                         panneModel.getCause(), 
                         panneModel.getDetails(), 
                         panneModel.getDescription(), 
@@ -1080,9 +1271,9 @@ public class PanneController {
                         panneModel.getRef(),
                         panneModel.getQte(),
                         panneModel.getDate(), 
-                        panneModel.getHeureArret(), 
-                        panneModel.getDebutInter(), 
-                        panneModel.getFinInter(), 
+                        panneModel.getHeure_arret(), 
+                        panneModel.getDebut_inter(), 
+                        panneModel.getFin_inter(), 
                         panneModel.isEtat(), 
                         panneModel.isCont(),
                         panneModel.getQuart(),
@@ -1091,28 +1282,36 @@ public class PanneController {
                         panneModel.getWT(),
                         panneModel.getTTR()
                 );
-		panneService.addPanne(panne, panneModel.getIdMachine(), panneModel.getIdOperateur(), panneModel.getIdTechnicien());
-
-		return new ResponseEntity<>(panne,HttpStatus.CREATED);
-	}
-	
-	@DeleteMapping("/{code}")
-	public void deleMachine(@PathVariable Long numero) {
-		panneService.deletePanne(numero);
+	    panneService.addPanne(panne, panneModel.getMachines().getIdMachine(), panneModel.getOperateurs().getIdOperateur(), tec.getIdTechnicien());
+		  
 	}
         
-        @PutMapping("/{numero}")
-	public void activePanne(@PathVariable String numero) {
-	    List<Pannes> pan = new ArrayList<>();
-            PanneModel panneModel = new PanneModel();
-            
-            for(int i=0; i< panneRepository.findByNumero(numero).size(); i++){
-                pan = panneRepository.findByNumero(numero);
-                if(!pan.get(i).isEtat()){
-                    pan.get(i).setEtat(true); 
-                }
-                panneRepository.save(pan.get(i));
+        @PostMapping("/upload")
+        public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
+          String message = "";
+          if (new panExcelHelper().hasExcelFormat(file)) {
+            try {
+              fileService.savePanne(file);
+              message = "Uploaded the file successfully: " + file.getOriginalFilename();
+              return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            } catch (Exception e) {
+              message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+              return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
             }
+          }
+
+          message = "Please upload an excel file!";
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessage(message));
+        }
         
-	}
+        @GetMapping("/download")
+        public ResponseEntity<org.springframework.core.io.Resource> getFile() {
+          String filename = "tutorials.csv";
+          InputStreamResource file = new InputStreamResource(fileService.loadPanne());
+
+          return ResponseEntity.ok()
+              .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+              .contentType(MediaType.parseMediaType("application/csv"))
+              .body(file);
+        }
 }

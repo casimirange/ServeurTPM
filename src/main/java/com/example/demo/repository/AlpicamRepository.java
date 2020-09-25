@@ -727,6 +727,8 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "from heures h\n" +
         "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+//        "JOIN machines m on p.id_machine = m.id_machine\n" +
+//        "WHERE p.dt > 15 AND m.label = 'correctif' "+    
         "GROUP by date_format(h.date, '%y%M'), p.numero \n" +
         "order by h.date desc \n" ;
     

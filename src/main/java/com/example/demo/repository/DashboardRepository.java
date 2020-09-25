@@ -51,7 +51,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     public List<DashboardResponse> countPerDay(LocalDate date, LocalDate date2);
     
     String countAll = "SELECT "
-            + "count(DISTINCT p.numero) as nbre, d.nom as dep, d.id_departement, "
+            + "count(DISTINCT p.numero) as nbre, d.nom as dep, d.id_departement as idDepartement, "
             + "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT "
             + "FROM pannes p "
             + "JOIN machines m on p.id_machine = m.id_machine "
@@ -68,14 +68,22 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     
     String countThisYear = "SELECT count(DISTINCT p.numero) as nbre "
             + "FROM Pannes p "
-            + "where DATE_FORMAT(p.date, '%Y') = ?1 ";
+            + "join machines m on p.id_machine = m.id_machine "
+            + "where DATE_FORMAT(p.date, '%Y') = ?1 "
+//            + "and p.dt > 15 "
+            + "and m.label = 'correctif' ";
   
     @Query( value=countThisYear, nativeQuery = true)
     public List<JSONObject> countThisYear(String date);
     
     String countLast30Day = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
-            + "FROM Pannes where date between ?1 and ?2  GROUP by date, numero order by date asc";
+            + "FROM Pannes p "
+            + "join machines m on m.id_machine = p.id_machine "
+            + "where date between ?1 and ?2  "
+//            + "and p.dt > 15 "
+//            + "and m.label = 'correctif' "
+            + "GROUP by p.date, numero order by p.date asc";
 
   
     @Query(value=countLast30Day, nativeQuery = true)
@@ -83,7 +91,11 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     
     String countMonthPanne = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
-            + "FROM Pannes where DATE_FORMAT(date, '%Y/%m') = ?1 GROUP by date, numero order by date asc";
+            + "FROM Pannes p join machines m on p.id_machine = m.id_machine "
+            + "where DATE_FORMAT(date, '%Y/%m') = ?1 "
+//            + "and p.dt > 15 "
+//            + "and m.label = 'correctif' "
+            + "GROUP by date, numero order by date asc";
 
   
     @Query(value=countMonthPanne, nativeQuery = true)
@@ -183,7 +195,8 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
 "            COALESCE(sum(DISTINCT timestampdiff(minute, p.debut_inter, p.fin_inter)), 0) as TTR, " +
 "            COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.debut_inter)), 0) as WT, " +
 "            COUNT(DISTINCT p.numero) as nbre " +
-"            from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%b%Y') = date_format(h.date, '%b%Y'))  " +
+"            from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%b%Y') = date_format(h.date, '%b%Y'))  "
+            + "join machines m on (m.id_machine = p.id_machine and m.label LIKE 'cor%') " +
 "            WHERE date_format(h.date, '%Y') = ?1 " +
 "            GROUP by date_format(h.date, '%b%Y'), p.numero ORDER BY h.date";
     

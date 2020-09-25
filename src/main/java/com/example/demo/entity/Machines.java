@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "machines")
@@ -35,10 +36,13 @@ public class Machines implements Serializable{
 	private String centre_cout;
 	
 	private String label;
-	
-	/*@Lob
-	private byte pic;*/
-	
+        
+        @Column(columnDefinition="varchar(20) default 'bonaberi'")
+	private String localisation;    
+        
+        @Column(columnDefinition = "BIT default true", length = 1)
+	private boolean etat;
+		
 	@ManyToOne //plusieurs machines pour une ligne
 	@JoinColumn(name = "idLigne")
 	
@@ -73,16 +77,26 @@ public class Machines implements Serializable{
 		this.label = label;
 	}
 
-	
-
-	/*public Machines(String nom, String code, String centre_cout, String label, byte pic) {
+	public Machines(String nom, String code, String centre_cout, String label, String localisation, boolean etat) {
 		super();
 		this.nom = nom;
 		this.code = code;
 		this.centre_cout = centre_cout;
 		this.label = label;
-		this.pic = pic;
-	}*/
+                this.localisation = localisation;
+                this.etat = etat;
+	}
+
+	
+
+	public Machines(String nom, String code, String centre_cout, String label, Lignes ligne) {
+		super();
+		this.nom = nom;
+		this.code = code;
+		this.centre_cout = centre_cout;
+		this.label = label;
+		this.lignes = ligne;
+	}
 
 	public Long getIdMachine() {
 		return idMachine;
@@ -137,7 +151,7 @@ public class Machines implements Serializable{
 	}
 
 	public void setLabel(String label) {
-		label = label;
+		this.label = label;
 	}
 
 	public Lignes getLignes() {
@@ -171,6 +185,22 @@ public class Machines implements Serializable{
 	public void setArrets(List<Arrets> arrets) {
 		this.arrets = arrets;
 	}
+
+        public String getLocalisation() {
+            return localisation;
+        }
+
+        public void setLocalisation(String localisation) {
+            this.localisation = localisation;
+        }
+
+    public boolean isEtat() {
+        return etat;
+    }
+
+    public void setEtat(boolean etat) {
+        this.etat = etat;
+    }
 	
 
 	/*public byte getPic() {

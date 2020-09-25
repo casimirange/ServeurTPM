@@ -47,7 +47,7 @@ public class Pannes implements Serializable{
         @Column(nullable = true)
         private String ref;
         
-        @Value("${some.key:0}")
+        @Column(columnDefinition="int(11) default '0'", nullable = true)
         private int qte;
 	
 	private LocalDate date;
@@ -73,10 +73,11 @@ public class Pannes implements Serializable{
 	@JsonIgnore
 	private Machines machines;
 	
+        @Column(columnDefinition = "BIT default true", length = 1)
 	private boolean etat;
 	private boolean cont;
         
-        @Value("${some.key:1}")
+        @Column(columnDefinition="int(11) default '1'")
 	private int quart;
 	
 	private String numero;

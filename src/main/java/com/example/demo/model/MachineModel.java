@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import javax.persistence.Column;
+
 public class MachineModel {
 
 	 Long idLigne;
@@ -8,6 +10,11 @@ public class MachineModel {
 	 String centreCout;
 	 String code;
 	 Long idMachine;
+         @Column(columnDefinition="varchar(20) default 'bonaberi'")
+	private String localisation;    
+        
+        @Column(columnDefinition = "BIT default true", length = 1)
+	private boolean etat;
 	 //byte[] photo;
 	 
 	public Long getIdLigne() {
@@ -46,12 +53,23 @@ public class MachineModel {
 	public void setIdMachine(Long idMachine) {
 		this.idMachine = idMachine;
 	}
-	/*public byte[] getPhoto() {
-		return photo;
-	}
-	public void setPhoto(byte[] photo) {
-		this.photo = photo;
-	}*/
+
+    public Boolean getEtat() {
+        return etat;
+    }
+
+    public void setEtat(Boolean etat) {
+        this.etat = etat;
+    }
+
+    public String getLocalisation() {
+        return localisation;
+    }
+
+    public void setLocalisation(String Localisation) {
+        this.localisation = Localisation;
+    }
+	
 	
 	
 	

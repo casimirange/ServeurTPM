@@ -67,13 +67,6 @@ public class TechniciensService implements ITechnicienService {
             return technicienRepository.findByMatricule(matricule);
         }
     
-        @Override
-        public List<Techniciens> allDesactiveTech() {
-		return technicienRepository.DesactivatedTech();
-	}
         
-        public List<Techniciens> allActiveTech() {
-		return technicienRepository.ActivatedTech();
-	}
 
 }

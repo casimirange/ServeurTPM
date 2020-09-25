@@ -56,7 +56,7 @@ public class PannesService implements IPanneService {
 		return panneRepository.ToutesLesPannes();
 	}               
 	
-	public List<PannesTechReponse> FindByNum(String numero) {
+	public List<JSONObject> FindByNum(String numero) {
 		return panneRepository.Techs(numero);
 	}
         
@@ -107,9 +107,9 @@ public class PannesService implements IPanneService {
 	}
 
 	@Override
-	public void deletePanne(Long numero) {
+	public void deletePanne(String numero) {
 		Pannes panne = new Pannes();
-		panne.setIdPanne(numero);
+		panne.setNumero(numero);
 		panneRepository.delete(panne);
 	}
 

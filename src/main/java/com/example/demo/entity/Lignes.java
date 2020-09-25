@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +41,7 @@ public class Lignes implements Serializable{
 	//@JsonIgnore
 	public Departement departement;
 	
+        @JsonIgnore
 	@OneToMany(mappedBy = "lignes")
 	private List<Machines> machines;
 

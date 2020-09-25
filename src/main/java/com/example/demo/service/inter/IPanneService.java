@@ -19,7 +19,7 @@ public interface IPanneService {
 	
 	void updatePanne(Pannes panne, Long code_machine, Long id_oper, Long id_tech);
 	
-	void deletePanne(Long numero);
+	void deletePanne(String numero);
 
         JSONObject showPanne(String numero);
         

@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.springframework.beans.factory.annotation.Value;
 
 //import org.hibernate.validator.constraints.UniqueElements;
 
@@ -31,6 +32,12 @@ public class Operateurs implements Serializable{
 	 
 	private String prenom;
 
+        @Column(columnDefinition="varchar(20) default 'bonaberi'")
+	private String localisation;    
+        
+        @Column(columnDefinition = "BIT default true", length = 1)
+	private boolean etat;
+        
 	@Column(unique = true)
 	private Long matricule;
 	
@@ -43,7 +50,13 @@ public class Operateurs implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	
+        public Operateurs(String nom, String prenom, String localisation, boolean etat, Long matricule) {
+            this.nom = nom;
+            this.prenom = prenom;
+            this.localisation = localisation;
+            this.etat = etat;
+            this.matricule = matricule;
+        }	
 
 	public Operateurs(Long idOperateur, String nom, String prenom, Long matricule, List<Pannes> pannes) {
 		super();
@@ -102,6 +115,22 @@ public class Operateurs implements Serializable{
 	public void setPannes(List<Pannes> pannes) {
 		this.pannes = pannes;
 	}
+
+    public String getLocalisation() {
+        return localisation;
+    }
+
+    public void setLocalisation(String localisation) {
+        this.localisation = localisation;
+    }
+
+    public boolean isEtat() {
+        return etat;
+    }
+
+    public void setEtat(boolean etat) {
+        this.etat = etat;
+    }
 
 
 
