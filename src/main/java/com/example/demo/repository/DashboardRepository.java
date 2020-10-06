@@ -43,7 +43,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "FROM Pannes p JOIN p.machines m "
             + "JOIN m.lignes l "
             + "JOIN l.departement d "
-            + "where p.date between ?1 and ?2 "
+            + "where p.date between ?1 and ?2 and m.label like 'corr%' and m.localisation like 'bonab%' "
             + "GROUP by p.date "
             + "order by p.date asc";
   
@@ -57,7 +57,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on l.id_ligne = m.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 "
+            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 and m.label like 'corr%' and m.localisation like 'bonab%' "
 //            + "and p.dt > 15 "
 //            + "and m.label = 'correctif' "
             + "GROUP by d.nom "
@@ -69,7 +69,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     String countThisYear = "SELECT count(DISTINCT p.numero) as nbre "
             + "FROM Pannes p "
             + "join machines m on p.id_machine = m.id_machine "
-            + "where DATE_FORMAT(p.date, '%Y') = ?1 "
+            + "where DATE_FORMAT(p.date, '%Y') = ?1 and m.label like 'corr%' and m.localisation like 'bonab%' "
 //            + "and p.dt > 15 "
             + "and m.label = 'correctif' ";
   
@@ -80,7 +80,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
             + "FROM Pannes p "
             + "join machines m on m.id_machine = p.id_machine "
-            + "where date between ?1 and ?2  "
+            + "where date between ?1 and ?2 and m.label like 'corr%' and m.localisation like 'bonab%' "
 //            + "and p.dt > 15 "
 //            + "and m.label = 'correctif' "
             + "GROUP by p.date, numero order by p.date asc";
@@ -92,7 +92,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     String countMonthPanne = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, heure_arret, fin_inter)),0) as dt "
             + "FROM Pannes p join machines m on p.id_machine = m.id_machine "
-            + "where DATE_FORMAT(date, '%Y/%m') = ?1 "
+            + "where DATE_FORMAT(date, '%Y/%m') = ?1 and m.label like 'corr%' and m.localisation like 'bonab%' "
 //            + "and p.dt > 15 "
 //            + "and m.label = 'correctif' "
             + "GROUP by date, numero order by date asc";
@@ -167,6 +167,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             "COALESCE(sum(DISTINCT timestampdiff(minute, p.debut_inter, p.fin_inter)), 0) as TTR, \n"
             + "count(DISTINCT p.numero) as nbre " +
             "from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%Y') = date_format(h.date, '%Y')) \n" +
+            "join machines m on (m.id_machine = p.id_machine and m.localisation like 'bonab%' and m.label like 'corre%') "+
             "GROUP by date_format(h.date, '%Y'), p.numero";
     
     @Query(value = pByYear, nativeQuery = true)
@@ -196,7 +197,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
 "            COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.debut_inter)), 0) as WT, " +
 "            COUNT(DISTINCT p.numero) as nbre " +
 "            from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%b%Y') = date_format(h.date, '%b%Y'))  "
-            + "join machines m on (m.id_machine = p.id_machine and m.label LIKE 'cor%') " +
+            + "join machines m on (m.id_machine = p.id_machine and m.label LIKE 'cor%' and m.localisation like 'bonab%') " +
 "            WHERE date_format(h.date, '%Y') = ?1 " +
 "            GROUP by date_format(h.date, '%b%Y'), p.numero ORDER BY h.date";
     
@@ -209,7 +210,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT \n" +
         "FROM pannes p\n" +
         "join techniciens t on t.id_technicien = p.id_technicien\n" +
-        "WHERE date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE date_format(p.date, '%Y/%m') = ?1 and t.localisation like 'bonab%'\n" +
         "GROUP BY t.nom, p.numero order by coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) desc";
   
     @Query( value=techStats, nativeQuery = true)
@@ -221,7 +222,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT \n" +
         "FROM pannes p\n" +
         "join techniciens t on t.id_technicien = p.id_technicien\n" +
-        "WHERE p.date between ?1 and ?2\n" +
+        "WHERE p.date between ?1 and ?2 and t.localisation like 'bonab%'\n" +
         "GROUP BY t.nom, p.numero order by coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) desc";
   
     @Query( value=techStatsrange, nativeQuery = true)

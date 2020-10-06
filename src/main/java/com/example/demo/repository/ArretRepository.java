@@ -78,6 +78,7 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
             "COUNT(a.numero) as nbre, \n" +
             "coalesce(sum(distinct timestampdiff(Minute, a.debut_arret, a.fin_arret)), 0) as TDT \n" +
             "FROM arrets a \n" +
+            "JOIN machines m on (a.id_machine = m.id_machine and m.label like 'corr%' and m.localisation like 'bonaber%') "+
             "where date_format(a.date, '%Y/%m') = ?1 \n" +
             "group by a.cause, a.numero";
   
@@ -90,6 +91,7 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
             "COUNT(a.numero) as nbre, \n" +
             "coalesce(sum(distinct timestampdiff(Minute, a.debut_arret, a.fin_arret)), 0) as TDT \n" +
             "FROM arrets a \n" +
+            "JOIN machines m on (a.id_machine = m.id_machine and m.label like 'corr%' and m.localisation like 'bonaber%') "+
             "where a.date between ?1 and ?2 \n" +
             "group by a.cause, a.numero";
   
@@ -99,7 +101,8 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
     
     String countLast30Day = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, debut_arret, fin_arret)),0) as dt "
-            + "FROM arrets  "
+            + "FROM arrets a "
+            + "JOIN machines m on (a.id_machine = m.id_machine and m.localisation like 'bona%') "
             + "where date between ?1 and ?2  "
             + "GROUP by date, numero order by date asc";
 
@@ -109,7 +112,8 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
     
     String countMonthPanne = "SELECT date, count(distinct numero)as nbre, "
             + "COALESCE(sum(distinct timestampdiff(Minute, debut_arret, fin_arret)),0) as dt "
-            + "FROM arrets "
+            + "FROM arrets a "
+            + "JOIN machines m on (a.id_machine = m.id_machine and m.localisation like 'bona%') "
             + "where DATE_FORMAT(date, '%Y/%m') = ?1 "
             + "GROUP by date, numero order by date asc";
 
@@ -121,8 +125,8 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
         "COUNT(DISTINCT a.numero) as nbre \n" +  
         "from heures h\n" +
         "left outer JOIN arrets a on date_format(h.date, '%b%Y') = date_format(a.date, '%b%Y')\n" +
-//        "JOIN machines m on p.id_machine = m.id_machine\n" +
-//        "WHERE p.dt > 15 AND m.label = 'correctif' "+    
+        "JOIN machines m on a.id_machine = m.id_machine\n" +
+        "WHERE m.localisation like 'bonab%' "+    
         "GROUP by date_format(h.date, '%y%M'), a.numero \n" +
         "order by h.date desc \n" ;
     

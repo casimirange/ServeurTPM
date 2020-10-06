@@ -24,14 +24,14 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
     
     String typePanneMonth = "SELECT distinct t.fonction, COUNT(DISTINCT p.numero) as nbre "
             + "FROM pannes p JOIN techniciens t on p.id_technicien = t.id_technicien "
-            + "WHERE date_format(p.date, '%Y/%m') = ?1 GROUP by t.fonction";
+            + "WHERE date_format(p.date, '%Y/%m') = ?1 and t.localisation like 'bonab%' GROUP by t.fonction";
     
     @Query(value=typePanneMonth, nativeQuery = true)
     public List<JSONObject> typePanneMonth(String date);
     
     String typePanneRange = "SELECT distinct t.fonction, COUNT(DISTINCT p.numero) as nbre "
             + "FROM pannes p JOIN techniciens t on p.id_technicien = t.id_technicien "
-            + "WHERE p.date between ?1 and ?2 GROUP by t.fonction";
+            + "WHERE p.date between ?1 and ?2 and t.localisation like 'bonab%' GROUP by t.fonction";
     
     @Query(value=typePanneRange, nativeQuery = true)
     public List<JSONObject> typePanneRange(LocalDate date, LocalDate date2);
@@ -41,7 +41,8 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.debut_inter)), 0) as WT, \n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
-        "FROM pannes p\n" +
+        "FROM pannes p\n"
+            + "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "WHERE p.date BETWEEN ?1 and ?2\n" +
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -55,7 +56,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "join departement d on l.id_departement = d.id_departement " +
         "WHERE d.nom = 'placage' and p.date BETWEEN ?1 and ?2\n"+
@@ -71,7 +72,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "join departement d on l.id_departement = d.id_departement " +
         "WHERE d.nom = 'brazil' and p.date BETWEEN ?1 and ?2\n"+
@@ -87,7 +88,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "join departement d on l.id_departement = d.id_departement " +
         "WHERE d.nom = 'contreplaqué' and p.date BETWEEN ?1 and ?2\n"+
@@ -103,7 +104,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "join departement d on l.id_departement = d.id_departement " +
         "WHERE d.nom = 'scierie' and p.date BETWEEN ?1 and ?2\n"+
@@ -119,7 +120,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'ligne 1' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -134,7 +135,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'ligne 2' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -149,7 +150,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'ligne 3' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -164,7 +165,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'sechoirs' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -179,7 +180,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'jointage' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -194,7 +195,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'ecorcage' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -209,7 +210,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE m.nom like 'tapis%' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -224,7 +225,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'encollage Brazil' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -239,7 +240,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%') " +
         "join lignes l on l.id_ligne = m.id_ligne " +
         "WHERE l.nom_ligne = 'tranchage' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
@@ -634,7 +635,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "WHERE m.nom like 'scie Bong%' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -648,7 +649,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "WHERE m.nom = 'presse de tete' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -662,7 +663,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "WHERE m.nom = 'TRANCHEUSE CREMONA TN 4600  T1' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -676,7 +677,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "WHERE m.nom = 'TRANCHEUSE CREMONA TN 4600  T2' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -690,7 +691,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)), 0) as TTR,\n" +
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "FROM pannes p\n" +
-        "join machines m on p.id_machine = m.id_machine " +
+        "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%') " +
         "WHERE m.nom = 'presse simi' and p.date BETWEEN ?1 and ?2\n"+
         "GROUP BY date_format(p.date, '%b'), p.numero\n" +
         "ORDER by p.date";
@@ -702,7 +703,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
-            "join machines m on m.id_machine = p.id_machine\n" +
+            "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%')\n" +
             "WHERE p.date between ?1 and ?2 \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
@@ -713,7 +714,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
-            "join machines m on m.id_machine = p.id_machine\n" +
+            "join machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%')\n" +
             "WHERE date_format(p.date, '%Y/%m') = ?1 \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
@@ -727,8 +728,7 @@ public interface AlpicamRepository extends JpaRepository<Pannes, Long>{
         "coalesce(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)), 0) as TDT \n" +
         "from heures h\n" +
         "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
-//        "JOIN machines m on p.id_machine = m.id_machine\n" +
-//        "WHERE p.dt > 15 AND m.label = 'correctif' "+    
+        "JOIN machines m on (p.id_machine = m.id_machine and m.localisation like 'bonabe%' and m.label like 'corr%')\n" +   
         "GROUP by date_format(h.date, '%y%M'), p.numero \n" +
         "order by h.date desc \n" ;
     

@@ -6,6 +6,7 @@
 package com.example.demo.helper;
 
 import com.example.demo.entity.Departement;
+import com.example.demo.entity.Heures;
 import com.example.demo.entity.Lignes;
 import com.example.demo.entity.Machines;
 import com.example.demo.entity.Operateurs;
@@ -43,12 +44,12 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Casimir
  */
-public class panExcelHelper {
+public class heureExcelHelper {
     public  String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
      String[] HEADERs = { "idMachine", "Code", "Nom", "Label", "Centre_cout"};
 //     String[] HEADERs = { "idPanne", "Date", "IdMachine", "Description", "Cause", "Details", "Heure_arret", "Debut_inter",
 //    "Fin_inter", "WT", "TTR", "DT", "idOperateur", "idTechnicien", "Outil", "Qte", "Ref", "Quart", "Etat", "Cont", "Numero"};
-     String SHEET = "panne";
+     String SHEET = "heure";
     JSONObject json;
         
 
@@ -93,14 +94,14 @@ public class panExcelHelper {
   }
 
 
-  public List<Pannes> excelToTutorials(InputStream is) {
+  public List<Heures> excelToTutorials(InputStream is) {
     try {
       Workbook workbook = new XSSFWorkbook(is);
 
       Sheet sheet = workbook.getSheet(SHEET);
       Iterator<Row> rows = sheet.iterator();
         
-      List<Pannes> tutorials = new ArrayList<Pannes>();
+      List<Heures> tutorials = new ArrayList<Heures>();
       
       int rowNumber = 0;
       while (rows.hasNext()) {
@@ -112,7 +113,7 @@ public class panExcelHelper {
         }
 
         Iterator<Cell> cellsInRow = currentRow.iterator();
-        Pannes tutorial = new Pannes();
+        Heures tutorial = new Heures();
         
         int cellIdx = 0;
         while (cellsInRow.hasNext()) {
@@ -124,108 +125,8 @@ public class panExcelHelper {
             break; 
             
           case 1:
-              System.out.println("description: "+currentCell.getStringCellValue());
-            tutorial.setDescription(currentCell.getStringCellValue());
-            break;
-
-          case 2:
-              System.out.println("cause: "+currentCell.getStringCellValue());
-            tutorial.setCause(currentCell.getStringCellValue());
-            break;
-
-          case 3:
-              System.out.println("details: "+currentCell.getStringCellValue());
-            tutorial.setDetails(currentCell.getStringCellValue());
-            break;
-            
-          case 4:
-              System.out.println("heure_Arret: "+currentCell.getLocalDateTimeCellValue());
-            tutorial.setHeure_arret(currentCell.getLocalDateTimeCellValue());
-            break;
-
-          case 5:
-              System.out.println("debutInter: "+currentCell.getLocalDateTimeCellValue());
-            tutorial.setDebut_inter(currentCell.getLocalDateTimeCellValue());
-            break;
-
-          case 6:
-              System.out.println("finInter: "+currentCell.getLocalDateTimeCellValue());
-            tutorial.setFin_inter(currentCell.getLocalDateTimeCellValue());
-            break;
-
-          case 7:
-              System.out.println("wt: "+(int)currentCell.getNumericCellValue());
-            tutorial.setWT((int)currentCell.getNumericCellValue());
-            break;
-
-          case 8:
-              System.out.println("ttr: "+(int)currentCell.getNumericCellValue());
-            tutorial.setTTR((int)currentCell.getNumericCellValue());
-            break;
-
-          case 9:
-              System.out.println("dt: "+(int)currentCell.getNumericCellValue());
-            tutorial.setDT((int)currentCell.getNumericCellValue());
-            break;
-
-          case 10:
-            Object x = currentCell.getCellType();
-              System.out.println("hum: "+ x);
-              String zd = String.valueOf(x);
-              if(zd.equals("NUMERIC")){
-                  zd = "";
-                  System.out.println("outil: "+zd);
-              }else{
-                  zd = currentCell.getStringCellValue();
-                  System.out.println("outildddd: "+zd);
-              }
-              tutorial.setOutil(zd);
-            break;
-
-          case 11:
-//              Object yr = currentCell.getCellType();
-//              System.out.println("hum0: "+ yr);
-              System.out.println("qte: "+(int)currentCell.getNumericCellValue());
-            tutorial.setQte((int)currentCell.getNumericCellValue());
-            break;
-
-          case 12:
-              Object y = currentCell.getCellType();
-              System.out.println("hum2: "+ y);
-              String z = String.valueOf(y);
-              if(z.equals("NUMERIC")){
-                  z = "";
-                  System.out.println("outil: "+z);
-              }else{
-                  z = currentCell.getStringCellValue();
-                  System.out.println("outildddd: "+z);
-              }
-//              System.out.println("ref: "+currentCell.getStringCellValue());
-            tutorial.setRef(z);
-            break;
-
-          case 13:
-              System.out.println("Quart: "+(int)currentCell.getNumericCellValue());
-            tutorial.setQuart((int)currentCell.getNumericCellValue());
-            break;
-
-          case 14:
-              Object yf = currentCell.getCellType();
-              System.out.println("hum23: "+ yf);
-              String g = "0";
-              String g2 = "TRUE";
-              System.out.println("Etat: "+(new Boolean(currentCell.getStringCellValue()).booleanValue()));
-            tutorial.setEtat(new Boolean(currentCell.getStringCellValue()).booleanValue());
-            break;
-
-          case 15:
-              System.out.println("Cont: "+(new Boolean(currentCell.getStringCellValue()).booleanValue()));
-            tutorial.setCont(new Boolean(currentCell.getStringCellValue()).booleanValue());
-            break;
-
-          case 16:
-              System.out.println("numero: "+currentCell.getStringCellValue());
-            tutorial.setNumero(currentCell.getStringCellValue());
+              System.out.println("heure: "+currentCell.getNumericCellValue());
+            tutorial.setHeure(currentCell.getNumericCellValue());
             break;
 
           default:
@@ -270,7 +171,7 @@ public class panExcelHelper {
         while (cellsInRow.hasNext()) {
           Cell currentCell = cellsInRow.next();
           switch (cellIdx) {            
-          case 17:
+          case 2:
               System.out.println("double 5:"+(long)currentCell.getNumericCellValue());              
               double y = currentCell.getNumericCellValue();
               Long s = (new Double(y)).longValue();
@@ -290,102 +191,6 @@ public class panExcelHelper {
       workbook.close();
 
       return machine;
-    } catch (IOException e) {
-      throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
-    }
-  }
-
-  public List<JSONObject> technicien(InputStream is) {
-    try {
-      Workbook workbook = new XSSFWorkbook(is);
-
-      Sheet sheet = workbook.getSheet(SHEET);
-      Iterator<Row> rows = sheet.iterator();
-      List<JSONObject> technicien = new ArrayList<JSONObject>();
-      
-      int rowNumber = 0;
-      while (rows.hasNext()) {
-        Row currentRow = rows.next();
-        // skip header
-        if (rowNumber == 0) {
-          rowNumber++;
-          continue;
-        }
-
-        Iterator<Cell> cellsInRow = currentRow.iterator();
-        
-        int cellIdx = 0;
-        while (cellsInRow.hasNext()) {
-          Cell currentCell = cellsInRow.next();
-          switch (cellIdx) {            
-          case 19:
-              System.out.println("double 5:"+(long)currentCell.getNumericCellValue());              
-              double y = currentCell.getNumericCellValue();
-              Long s = (new Double(y)).longValue();
-              System.out.println("ache : "+s);
-              Map<String, Object> response2 = new HashMap<>();
-              response2.put("technicien", s);
-            json = new JSONObject(response2);
-            break;
-          default:
-            break;
-          }
-          cellIdx++;
-        }
-        technicien.add(json);
-      }
-
-      workbook.close();
-
-      return technicien;
-    } catch (IOException e) {
-      throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
-    }
-  }
-
-  public List<JSONObject> operateur(InputStream is) {
-    try {
-      Workbook workbook = new XSSFWorkbook(is);
-
-      Sheet sheet = workbook.getSheet(SHEET);
-      Iterator<Row> rows = sheet.iterator();
-      List<JSONObject> operateur = new ArrayList<JSONObject>();
-      
-      int rowNumber = 0;
-      while (rows.hasNext()) {
-        Row currentRow = rows.next();
-        // skip header
-        if (rowNumber == 0) {
-          rowNumber++;
-          continue;
-        }
-
-        Iterator<Cell> cellsInRow = currentRow.iterator();
-        
-        int cellIdx = 0;
-        while (cellsInRow.hasNext()) {
-          Cell currentCell = cellsInRow.next();
-          switch (cellIdx) {            
-          case 18:
-              System.out.println("double 5:"+(long)currentCell.getNumericCellValue());    
-              double y = currentCell.getNumericCellValue();
-              Long s = (new Double(y)).longValue();
-              System.out.println("ache : "+s);
-              Map<String, Object> response2 = new HashMap<>();
-              response2.put("operateur", s);
-            json = new JSONObject(response2);
-            break;
-          default:
-            break;
-          }
-          cellIdx++;
-        }
-        operateur.add(json);
-      }
-
-      workbook.close();
-
-      return operateur;
     } catch (IOException e) {
       throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
     }

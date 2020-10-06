@@ -99,9 +99,14 @@ System.out.println("test2");
 //              .body(file);
 //        }
         
+	@GetMapping("/all")
+	public List<Departement> getAllDepartements(){
+		return departementRepository.findAll();
+	}
+        
 	@GetMapping
 	public List<Departement> getDepartements(){
-		return departementRepository.findAll();
+		return departementRepository.findByLocalisation("bonaberi");
 	}
 	
 	@GetMapping("/{id}")
@@ -127,6 +132,7 @@ System.out.println("test2");
         @GetMapping("/pannes/{dep}")
 	public List<JSONObject> allMachinesByDepartmetn(@PathVariable Long dep){
 //		return departementRepository.panneDep(dep);
+System.out.println("masssssssssssssaaaaaaaa!!!!!!!!!!!!!!!!!");
                 List<JSONObject> Allpannes = departementRepository.panneDep(dep);
             Map<String, Object> response2 = new HashMap<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
@@ -662,7 +668,7 @@ System.out.println("test2");
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -752,14 +758,19 @@ System.out.println("test2");
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if((month + 1)< 10){
                 if(month == 0){
                     mts = String.valueOf(year - 1)+"/12";
                 }else{
                     mts = String.valueOf(year)+"/0"+ String.valueOf(month);
                 }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             System.out.println("mois passé: "+ mts);
 //		return panneRepository.MonthPannes(mts);
@@ -1014,7 +1025,7 @@ System.out.println("test2");
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -1129,11 +1140,19 @@ System.out.println("test2");
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("last month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
 		List<JSONObject> pby = departementRepository.CountDepPanne(mts, dep);
 List<JSONObject> MTBF = new ArrayList<>();
@@ -1243,11 +1262,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("last month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             return departementRepository.HourDep(mts, dep);
 	}
@@ -1258,7 +1285,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("last month: "+ mts);
             }else{
@@ -2149,7 +2176,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -2232,12 +2259,20 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
-            }                     
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }                    
 
             List<JSONObject> pty = departementRepository.ParetoThisMonth(dep, mts);
             List<JSONObject> MTBF = new ArrayList<>();
@@ -3469,6 +3504,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             json2 = new JSONObject(response2);
             nbre.add(json2);            
             });
+            System.out.println("nombreeeeeeeeeee: "+nbre);
         
         Map<String, Double> tdtd = pby.stream().collect(
             Collectors.groupingBy(f -> f.get("date").toString(),
@@ -9163,7 +9199,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -9236,11 +9272,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -9425,7 +9469,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -9550,11 +9594,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -9738,7 +9790,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -9811,11 +9863,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -9999,7 +10059,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -10124,11 +10184,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -10312,7 +10380,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -10385,11 +10453,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -10573,7 +10649,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -10698,11 +10774,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -10886,7 +10970,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -10959,11 +11043,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -11147,7 +11239,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -11272,11 +11364,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -11461,7 +11561,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -11534,11 +11634,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -11722,7 +11830,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -11847,11 +11955,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -12035,7 +12151,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -12108,11 +12224,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -12296,7 +12420,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -12421,11 +12545,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -12610,7 +12742,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -12683,11 +12815,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -12871,7 +13011,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -12996,11 +13136,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -13239,7 +13387,7 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -13307,11 +13455,19 @@ List<JSONObject> MTBF = new ArrayList<>();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             
         List<JSONObject> dash = new ArrayList<>();

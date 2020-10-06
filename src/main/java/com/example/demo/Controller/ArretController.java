@@ -116,7 +116,7 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -131,11 +131,19 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("ce mois: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             return arretRepository.ArretThisMonth(mts);
     }
@@ -162,7 +170,7 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -240,11 +248,19 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("ce mois: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             List<JSONObject> Allpannes = arretRepository.ArretTypeMonth(mts);
             Map<String, Object> response2 = new HashMap<>();
@@ -464,12 +480,20 @@ public class ArretController {
         cal.setFirstDayOfWeek(0);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
-        if(month < 10){
-            mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-        System.out.println("last month: "+ mts);
-        }else{
-            mts = String.valueOf(year)+"/"+ String.valueOf(month);
-        }
+        if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
+            }else{
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
         List<JSONObject> dash = new ArrayList<>();
         List<JSONObject> test = arretRepository.countMonthPanne(mts);
         List<JSONObject> nbre = new ArrayList<>();
@@ -531,7 +555,7 @@ public class ArretController {
         cal.setFirstDayOfWeek(0);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
-        if(month < 10){
+        if(month+1 < 10){
             mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
         System.out.println("last month: "+ mts);
         }else{
@@ -715,7 +739,7 @@ public class ArretController {
         }
         System.out.println("récapitulatif: \n" + MTBF2);
         
-        return MTBF2.subList(0, 2);
+        return MTBF2;
     }
     
     @GetMapping("/paretoAlpiRange")
@@ -788,7 +812,7 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -861,11 +885,19 @@ public class ArretController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();

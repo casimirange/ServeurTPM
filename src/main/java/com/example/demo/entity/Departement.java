@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,18 +35,21 @@ public class Departement implements Serializable{
 	
 	private String nom;
 	
-	private String centre_cout;
+//	private String centre_cout;
 	
 	private String responsable;
+	
+	@Column(columnDefinition="varchar(20) default 'bonaberi'")
+	private String localisation;
 	
 	@OneToMany(mappedBy = "departement", cascade = CascadeType.ALL)
 	public List<Lignes> lignes;
 
-	public Departement(String nom, String centre_cout, String responsable) {
+	public Departement(String nom, String responsable, String localisation) {
 		super();
 		this.nom = nom;
-		this.centre_cout = centre_cout;
 		this.responsable = responsable;
+		this.localisation = localisation;
 	}
 
         /*
@@ -70,13 +74,21 @@ public class Departement implements Serializable{
 		this.nom = nom;
 	}
 
-	public String getCentre_cout() {
-		return centre_cout;
+	public String getLocalisation() {
+		return localisation;
 	}
 
-	public void setCentre_cout(String centre_cout) {
-		this.centre_cout = centre_cout;
+	public void setLocalisation(String localisation) {
+		this.localisation = localisation;
 	}
+
+//	public String getCentre_cout() {
+//		return centre_cout;
+//	}
+//
+//	public void setCentre_cout(String centre_cout) {
+//		this.centre_cout = centre_cout;
+//	}
 
 	public String getResponsable() {
 		return responsable;
@@ -94,6 +106,8 @@ public class Departement implements Serializable{
 		this.idDepartement = idDepartement;
 	}
 
+        
+        
 	@JsonManagedReference
 	public List<Lignes> getLignes() {
 		return lignes;

@@ -57,7 +57,7 @@ public class ExcelHelper {
         Row row = sheet.createRow(rowIdx++);
 
         row.createCell(0).setCellValue(tutorial.getNom());
-        row.createCell(1).setCellValue(tutorial.getCentre_cout());
+//        row.createCell(1).setCellValue(tutorial.getCentre_cout());
         row.createCell(2).setCellValue(tutorial.getResponsable());
 //        row.createCell(3).setCellValue(tutorial.isPublished());
       }
@@ -102,7 +102,7 @@ public class ExcelHelper {
             break;
 
           case 1:
-            tutorial.setCentre_cout(currentCell.getStringCellValue());
+//            tutorial.setCentre_cout(currentCell.getStringCellValue());
             break;
 
           case 2:

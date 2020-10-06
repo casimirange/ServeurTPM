@@ -6,15 +6,18 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Departement;
+import com.example.demo.entity.Heures;
 import com.example.demo.entity.Lignes;
 import com.example.demo.entity.Machines;
 import com.example.demo.entity.Operateurs;
 import com.example.demo.entity.Pannes;
 import com.example.demo.entity.Techniciens;
 import com.example.demo.helper.ExcelHelper;
+import com.example.demo.helper.heureExcelHelper;
 import com.example.demo.helper.machineExcelHelper;
 import com.example.demo.helper.panExcelHelper;
 import com.example.demo.repository.DepartementRepository;
+import com.example.demo.repository.HeureRepository;
 import com.example.demo.repository.LigneRepository;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.OperateurRepository;
@@ -47,6 +50,8 @@ public class ExcelService {
     OperateurRepository operateurRepository;
     @Autowired
     LigneRepository ligneRepository;
+    @Autowired
+    HeureRepository heureRepository;
 
   public void save(MultipartFile file) {
     try {
@@ -105,6 +110,29 @@ public class ExcelService {
       
       
       panneRepository.saveAll(tutorials3);
+    } catch (IOException e) {
+      throw new RuntimeException("fail to store excel data: " + e.getMessage());
+    }
+  }
+
+  public void saveHeure(MultipartFile file) {
+    try {
+      List<Heures> tutorials = new heureExcelHelper().excelToTutorials(file.getInputStream());
+      List<Heures> tutorials3 = new ArrayList<Heures>();
+      List<JSONObject> mach = new heureExcelHelper().machine(file.getInputStream());
+      
+      Heures panne = new Heures();
+		
+      
+        for (int i = 0; i< tutorials.size(); i++) {
+            panne = tutorials.get(i);
+            Machines machine = machineRepository.getOne((long)mach.get(i).get("machine"));
+            panne.setMachines(machine);
+            tutorials3.add(panne);
+        }
+      
+      
+      heureRepository.saveAll(tutorials3);
     } catch (IOException e) {
       throw new RuntimeException("fail to store excel data: " + e.getMessage());
     }

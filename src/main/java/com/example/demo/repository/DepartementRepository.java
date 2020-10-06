@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface DepartementRepository extends JpaRepository<Departement, Long>{
+    
+    List<Departement> findByLocalisation(String loc);
 
     String pannes = "SELECT DISTINCT "
             + "m.nom as machine, m.code, m.id_machine as idM, "
@@ -27,7 +29,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on m.id_ligne = l.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-            + "WHERE d.id_departement = ?1 "
+            + "WHERE d.id_departement = ?1 and d.localisation like 'bonab%' "
             + "GROUP by p.numero "
             + "order By p.date desc, p.heure_arret desc";
     
@@ -47,7 +49,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on m.id_ligne = l.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-            + "where p.date = ?1 and d.id_departement = ?2 "
+            + "where p.date = ?1 and d.id_departement = ?2 and d.localisation like 'bonab%'  "
             + "GROUP by p.numero ";
       
       
@@ -67,7 +69,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on m.id_ligne = l.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-            + "where p.date between ?1 and ?2  and d.id_departement = ?3 "
+            + "where p.date between ?1 and ?2  and d.id_departement = ?3 and d.localisation like 'bonab%'  "
             + "GROUP by p.numero "
             + "order by p.date desc";
       
@@ -88,7 +90,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on m.id_ligne = l.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 "
+            + "where DATE_FORMAT(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 and d.localisation like 'bonab%'  "
             + "GROUP by p.numero "
             + "order by p.date desc";
       
@@ -109,7 +111,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "JOIN machines m on p.id_machine = m.id_machine "
             + "JOIN lignes l on m.id_ligne = l.id_ligne "
             + "JOIN departement d on d.id_departement = l.id_departement "
-    + "where DATE_FORMAT(p.date, '%Y') = ?1 and d.id_departement = ?2 "
+    + "where DATE_FORMAT(p.date, '%Y') = ?1 and d.id_departement = ?2 and d.localisation like 'bonab%'  "
     + "GROUP by p.numero "
     + "order by p.date desc";
       
@@ -119,20 +121,20 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     
     String dashboard = "SELECT p.date, count(distinct p.numero)as nbre, "
         + "COALESCE(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)),0) as dt "
-        + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "
+        + "FROM Pannes p JOIN machines m on (p.id_machine = m.id_machine and m.localisation like 'bonab%' and m.label like 'corre%') "
         + "JOIN lignes l on m.id_ligne = l.id_ligne "
         + "JOIN departement d on d.id_departement = l.id_departement "
-        + "where p.date between ?1 and ?2 and d.id_departement = ?3 GROUP by date, numero order by p.date asc";
+        + "where p.date between ?1 and ?2 and d.id_departement = ?3 and d.localisation like 'bonab%'  GROUP by date, numero order by p.date asc";
   
     @Query(value=dashboard, nativeQuery = true)
     public List<JSONObject> dashboard(LocalDate date, LocalDate date2, Long x);
     
     String dashboardThisMonth = "SELECT p.date, count(distinct p.numero)as nbre, "
         + "COALESCE(sum(distinct timestampdiff(Minute, p.heure_arret, p.fin_inter)),0) as dt "
-        + "FROM Pannes p JOIN machines m on p.id_machine = m.id_machine "
+        + "FROM Pannes p JOIN machines m on (p.id_machine = m.id_machine and m.label like 'corr%' and m.localisation like 'bonab%') "
         + "JOIN lignes l on m.id_ligne = l.id_ligne "
-        + "JOIN departement d on d.id_departement = l.id_departement "
-        + "where date_format(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 GROUP by date, numero order by p.date asc";
+        + "JOIN departement d on d.id_departement = l.id_departement  "
+        + "where date_format(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 and d.localisation like 'bonab%'  GROUP by date, numero order by p.date asc";
   
     @Query(value=dashboardThisMonth, nativeQuery = true)
     public List<JSONObject> dashboardThisMonth(String date, Long x);
@@ -143,10 +145,10 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)) as TTR, "
             + "AVG(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as MDT "
             + "FROM pannes p "
-            + "join machines m on m.id_machine = p.id_machine "
+            + "join machines m on (m.id_machine = p.id_machine and m.label like 'corr%') "
             + "JOIN lignes l on l.id_ligne = m.id_ligne "
             + "join departement d on d.id_departement = l.id_departement "
-            + "WHERE date_format(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 "
+            + "WHERE date_format(p.date, '%Y/%m') = ?1 and d.id_departement = ?2 and d.localisation like 'bonab%'  "
             + "GROUP BY date_format(p.date, '%b%Y'), d.nom, p.numero";
     
     @Query(value = countDepPanne, nativeQuery = true)
@@ -157,7 +159,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "join machines m on m.id_machine = h.id_machine "
             + "JOIN lignes l on l.id_ligne = m.id_ligne "
             + "join departement d on d.id_departement = l.id_departement "
-            + "WHERE date_format(h.date, '%Y/%m') = ?1 and d.id_departement = ?2 "
+            + "WHERE date_format(h.date, '%Y/%m') = ?1 and d.id_departement = ?2  and d.localisation like 'bonab%' "
             + "GROUP BY date_format(h.date, '%b%Y'), d.nom";
     
     @Query(value = hourDep, nativeQuery = true)
@@ -169,8 +171,8 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "from heures h \n" +
             "join machines m on h.id_machine = m.id_machine \n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
-            "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE d.id_departement = ?1 \n" +
+            "join departement d on d.id_departement = l.id_departement  \n" +
+            "WHERE d.id_departement = ?1 and d.localisation like 'bonab%'  \n" +
             "GROUP by date_format(h.date, '%Y'), d.nom";
     
     @Query(value = hByYear, nativeQuery = true)
@@ -182,7 +184,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "join machines m on h.id_machine = m.id_machine \n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 \n" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%'  \n" +
             "GROUP by date_format(h.date, '%b%Y'), d.nom order by h.date";
     
     @Query(value = hThisYear, nativeQuery = true)
@@ -197,11 +199,11 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
             "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
-            "left outer join machines m on m.id_machine = p.id_machine\n" +
+            "left outer join machines m on (m.id_machine = p.id_machine and m.label like 'corr%')\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1" +
+            "WHERE d.id_departement = ?1 and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero";
     
@@ -216,11 +218,11 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
             "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
-            "left outer join machines m on m.id_machine = p.id_machine\n" +
+            "left outer join machines m on (m.id_machine = p.id_machine and m.label like 'corr%')\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -231,10 +233,10 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
-            "join machines m on m.id_machine = p.id_machine\n" +
+            "join machines m on (m.id_machine = p.id_machine and m.label like 'corr%')\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE p.date between ?2 and ?3 and d.id_departement = ?1 \n" +
+            "WHERE p.date between ?2 and ?3 and d.id_departement = ?1 and d.localisation like 'bonab%'  \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = paretoRange, nativeQuery = true)
@@ -244,10 +246,10 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) as TDT, \n" +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from pannes p \n" +
-            "join machines m on m.id_machine = p.id_machine\n" +
+            "join machines m on (m.id_machine = p.id_machine and m.label like 'corr%')\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
-            "WHERE date_format(p.date, '%Y/%m') = ?2  and d.id_departement = ?1 \n" +
+            "WHERE date_format(p.date, '%Y/%m') = ?2  and d.id_departement = ?1 and d.localisation like 'bonab%'  \n" +
             "GROUP by m.nom, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = paretoThisMonth, nativeQuery = true)
@@ -266,7 +268,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 1'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 1' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -280,12 +282,12 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1' " +
+            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1' and d.localisation like 'bonab%'  " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero order by h.date";
     
@@ -299,7 +301,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1'" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1' and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%Y') order by h.date";
     
@@ -313,7 +315,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1' and date_format(h.date, '%Y') = ?2" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 1' and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%b%Y') order by h.date";
     
@@ -334,7 +336,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 2'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 2' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -348,12 +350,12 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2' " +
+            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2' and d.localisation like 'bonab%'  " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero order by h.date";
     
@@ -367,7 +369,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2'" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2' and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%Y') order by h.date";
     
@@ -381,7 +383,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2' and date_format(h.date, '%Y') = ?2" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 2' and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%b%Y') order by h.date";
     
@@ -402,7 +404,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 3'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ligne 3' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -416,12 +418,12 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3' " +
+            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3' and d.localisation like 'bonab%'  " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero order by h.date";
     
@@ -435,7 +437,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3'" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3' and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%Y') order by h.date";
     
@@ -449,7 +451,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3' and date_format(h.date, '%Y') = ?2" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ligne 3' and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%b%Y') order by h.date";
     
@@ -469,7 +471,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'sechoirs'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'sechoirs' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -483,12 +485,12 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs' " +
+            "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs' and d.localisation like 'bonab%'  " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero order by h.date";
     
@@ -502,7 +504,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs'" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs' and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%Y') order by h.date";
     
@@ -516,7 +518,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs' and date_format(h.date, '%Y') = ?2" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'sechoirs' and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%b%Y') order by h.date";
     
@@ -536,7 +538,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ecorcage'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'ecorcage' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -550,12 +552,12 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage' " +
+            "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage' and d.localisation like 'bonab%'  " +
             "\n" +
             "GROUP by date_format(h.date, '%Y'), p.numero order by h.date";
     
@@ -569,7 +571,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage'" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage' and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%Y') order by h.date";
     
@@ -583,7 +585,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
         "join departement d on d.id_departement = l.id_departement \n" +
         "\n" +
-        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage' and date_format(h.date, '%Y') = ?2" +
+        "WHERE d.id_departement = ?1 and l.nom_ligne = 'ecorcage' and date_format(h.date, '%Y') = ?2 and d.localisation like 'bonab%' " +
         "\n" +
         "GROUP by date_format(h.date, '%b%Y') order by h.date";
     
@@ -603,7 +605,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
-            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'encollage Brazil'" +
+            "WHERE d.id_departement = ?1 and date_format(h.date, '%Y') = ?2 and l.nom_ligne = 'encollage Brazil' and d.localisation like 'bonab%' " +
             "\n" +
             "GROUP by date_format(h.date, '%b%Y'), p.numero order by h.date";
     
@@ -617,7 +619,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -684,7 +686,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -733,7 +735,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
             "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
-            "left outer join machines m on m.id_machine = p.id_machine\n" +
+            "left outer join machines m on (m.id_machine = p.id_machine and m.label like 'corr%')\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
             "\n" +
@@ -751,7 +753,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -818,7 +820,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -885,7 +887,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -952,7 +954,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -1019,7 +1021,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
             + "COALESCE(sum(distinct timestampdiff(Minute, p.debut_inter, p.fin_inter)),0) as TTR, " +
             "COUNT(DISTINCT p.numero) as nbre \n" +
             "from heures h \n" +
-            "left outer JOIN pannes p on date_format(h.date, '%b%Y') = date_format(p.date, '%b%Y')\n" +
+            "left outer JOIN pannes p on date_format(h.date, '%Y') = date_format(p.date, '%Y')\n" +
             "left outer join machines m on m.id_machine = p.id_machine\n" +
             "JOIN lignes l on l.id_ligne = m.id_ligne \n" +
             "join departement d on d.id_departement = l.id_departement \n" +
@@ -1065,7 +1067,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'derouleuse%' and p.date between ?1 and ?2\n" +
+        "WHERE m.nom LIKE 'derouleuse%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = DerouleuseRange, nativeQuery = true) 
@@ -1077,7 +1079,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'derouleuse%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'derouleuse%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = DerouleuseThisMonth, nativeQuery = true) 
@@ -1089,7 +1091,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'bobineuse%' and p.date between ?1 and ?2\n" +
+        "WHERE m.nom LIKE 'bobineuse%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = BobineuseRange, nativeQuery = true) 
@@ -1101,7 +1103,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'bobineuse%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'bobineuse%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = BobineuseThisMonth, nativeQuery = true) 
@@ -1113,7 +1115,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'magasin b%' and p.date between ?1 and ?2\n" +
+        "WHERE m.nom LIKE 'magasin b%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = MagasinBobineRange, nativeQuery = true) 
@@ -1125,7 +1127,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'magasin b%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'magasin b%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = MagasinBobineThisMonth, nativeQuery = true) 
@@ -1137,7 +1139,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'massicot%' and p.date between ?1 and ?2\n" +
+        "WHERE m.nom LIKE 'massicot%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = Massicotrange, nativeQuery = true) 
@@ -1149,7 +1151,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'massicot%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'massicot%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = MassicotThisMonth, nativeQuery = true) 
@@ -1160,8 +1162,9 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "m.nom,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
-        "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'sechoir%' and p.date between ?1 and ?2\n" +
+        "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n"
+        + "join lignes l on l.id_ligne = m.id_ligne " +
+        "WHERE l.nom_ligne LIKE 'sechoir%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = SechoirRange, nativeQuery = true) 
@@ -1173,7 +1176,8 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'sechoir%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "join lignes l on l.id_ligne = m.id_ligne " +
+        "WHERE l.nom_ligne LIKE 'sechoir%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = SechoirThisMonth, nativeQuery = true) 
@@ -1185,7 +1189,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'trancheuse%' and p.date between ?1 and ?2\n" +
+        "WHERE m.nom LIKE 'trancheuse%' and m.localisation like 'bonab%' and p.date between ?1 and ?2\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = TrancheuseRange, nativeQuery = true) 
@@ -1197,7 +1201,7 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
         "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT,\n" +
         "count(DISTINCT p.numero) as nbre\n" +
         "FROM pannes p JOIN machines m on m.id_machine = p.id_machine\n" +
-        "WHERE m.nom LIKE 'trancheuse%' and date_format(p.date, '%Y/%m') = ?1\n" +
+        "WHERE m.nom LIKE 'trancheuse%' and m.localisation like 'bonab%' and date_format(p.date, '%Y/%m') = ?1\n" +
         "GROUP by p.date, p.numero ORDER by sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)) desc";
     
     @Query(value = TrancheuseThisMonth, nativeQuery = true) 

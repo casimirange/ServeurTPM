@@ -85,7 +85,7 @@ public class DashboardController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -101,7 +101,7 @@ public class DashboardController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -178,11 +178,19 @@ public class DashboardController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("ce mois: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             
         List<JSONObject> dash = new ArrayList<>();
@@ -323,12 +331,20 @@ public class DashboardController {
         cal.setFirstDayOfWeek(0);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
-        if(month < 10){
-            mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-        System.out.println("last month: "+ mts);
-        }else{
-            mts = String.valueOf(year)+"/"+ String.valueOf(month);
-        }
+        if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
+            }else{
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
         return dashboardRepository.TotalLPannes(mts);
     }  
     
@@ -465,12 +481,20 @@ public class DashboardController {
         cal.setFirstDayOfWeek(0);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
-        if(month < 10){
-            mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-        System.out.println("last month: "+ mts);
-        }else{
-            mts = String.valueOf(year)+"/"+ String.valueOf(month);
-        }
+        if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
+            }else{
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+            }
         List<JSONObject> dash = new ArrayList<>();
         List<JSONObject> test = dashboardRepository.countMonthPanne(mts);
         List<JSONObject> nbre = new ArrayList<>();
@@ -532,7 +556,7 @@ public class DashboardController {
         cal.setFirstDayOfWeek(0);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
-        if(month < 10){
+        if(month+1 < 10){
             mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
         System.out.println("last month: "+ mts);
         }else{
@@ -658,30 +682,23 @@ public class DashboardController {
 //    }
     
     @GetMapping("/mtbfByYear")
-    public List<JSONObject> MTBFTByYearAlpi(){        
+    public LinkedHashSet<JSONObject> MTBFTByYearAlpi(){        
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> hby = dashboardRepository.hourByYear();
         List<JSONObject> pby = dashboardRepository.PByYear();
-        List<JSONObject> aby = dashboardRepository.AByYear();
-        
-        System.out.println("heures :\n" + hby);
-        System.out.println("pannes :\n" + pby);
-        System.out.println("arrets :\n" + aby);
-        
-         Map<String,String> response = new HashMap<>();
-         Map<String,String> response2 = new HashMap<>();
-         List<Map<String,String>> reponse = new ArrayList<>();
-         
-         List<JSONObject> test = new ArrayList<>();
-         List<JSONObject> test2 = new ArrayList<>(); 
-         List<JSONObject> test3 = new ArrayList<>(); 
-         
-         List<JSONObject> nbre = new ArrayList<>();
-         List<JSONObject> tdth = new ArrayList<>();
-         List<JSONObject> wth = new ArrayList<>();
-         List<JSONObject> ttrh = new ArrayList<>();
-         LinkedHashSet<JSONObject> test7 = new LinkedHashSet<>();
-         List<JSONObject> test6 = new ArrayList<>();
+        Map<String,Object> response2 = new HashMap<>();
+            List<JSONObject> test2 = new ArrayList<>();   
+            List<JSONObject> nbre = new ArrayList<>();
+            List<JSONObject> hour = new ArrayList<>();
+            List<JSONObject> tdth = new ArrayList<>();
+            List<JSONObject> wth = new ArrayList<>();
+            List<JSONObject> ttrh = new ArrayList<>();
+            List<JSONObject> nbre1 = new ArrayList<>();
+            List<JSONObject> tdth1 = new ArrayList<>();
+            List<JSONObject> wth1 = new ArrayList<>();
+            List<JSONObject> ttrh1 = new ArrayList<>();
+            LinkedHashSet<JSONObject> test7 = new LinkedHashSet<>();
+            List<JSONObject> test5 = new ArrayList<>();
          
         Map<String, Integer> result = pby.stream().collect(
             Collectors.groupingBy(e -> e.get("date").toString(),
@@ -690,7 +707,6 @@ public class DashboardController {
         
         result.entrySet().stream()
             .forEach(date -> {
-                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
             response2.put("date", date.getKey());
             response2.put("nbre", String.valueOf(date.getValue()));
             json2 = new JSONObject(response2);
@@ -704,7 +720,6 @@ public class DashboardController {
         
         tdtd.entrySet().stream()
             .forEach(dates -> {
-                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
             response2.put("date", dates.getKey());
             response2.put("TDT", String.valueOf(dates.getValue()));
             json2 = new JSONObject(response2);
@@ -718,7 +733,6 @@ public class DashboardController {
         
         wt1d.entrySet().stream()
             .forEach(datr -> {
-//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
             response2.put("date", datr.getKey());
             response2.put("WT", String.valueOf(datr.getValue()));
             json2 = new JSONObject(response2);
@@ -732,7 +746,6 @@ public class DashboardController {
         
         ttrs.entrySet().stream()
             .forEach(datee -> {
-//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
             response2.put("date", datee.getKey());
             response2.put("TTR", String.valueOf(datee.getValue()));
             json2 = new JSONObject(response2);
@@ -750,10 +763,11 @@ public class DashboardController {
                         
                         if(h.equals(m) && h.equals(x) && h.equals(y)){
                             response2.put("date", h);
-                            response2.put("nbre", String.valueOf(nb.get("nbre")));
-                            response2.put("TDT", String.valueOf(td.get("TDT")));
-                            response2.put("WT", String.valueOf(wts.get("WT")));
-                            response2.put("TTR", String.valueOf(tt.get("TTR")));
+                            response2.put("nbre", Double.parseDouble(nb.get("nbre").toString()));
+                            response2.put("TDT", Double.parseDouble(td.get("TDT").toString()));
+                            response2.put("WT", Double.parseDouble(wts.get("WT").toString()));
+                            response2.put("TTR", Double.parseDouble(tt.get("TTR").toString()));
+                            response2.put("HT", Double.parseDouble("0"));
                             json2 = new JSONObject(response2);
                         }
                         
@@ -763,41 +777,121 @@ public class DashboardController {
             MTBF.add(json2);
         });
                         System.out.println("final \n" + MTBF);
-                        
+
             for(int i = 0; i< hby.size(); i++){
-                response2.put("date", String.valueOf(hby.get(i).get("date")));
-                response2.put("HT", String.valueOf(hby.get(i).get("HT")));
-                response2.put("nbre", "0");
-                response2.put("TDT", "0");                    
-                response2.put("WT", "0");
-                response2.put("TTR", "0");
-                json2 = new JSONObject(response2);
-            test3.add(json2);
-        } 
-         
-        hby.forEach(y->{
-            MTBF.forEach(t-> {
-                aby.forEach(a->{                   
-                
-                   String h = String.valueOf(y.get("date"));
-                   String m = String.valueOf(t.get("date"));                    
-                   String ar = String.valueOf(a.get("date"));                   
-                   //si date l'heure de fct = date panne
-                 if(h.equals(m) && h.equals(ar) ) {
-                     response.put("date", String.valueOf(y.get("date")));
-                     response.put("nbre", String.valueOf(t.get("nbre")));
-                     response.put("TDT", String.valueOf(t.get("TDT")));
-                     response.put("WT", String.valueOf(t.get("WT")));
-                     response.put("TTR", String.valueOf(t.get("TTR")));
-                     response.put("HT", String.valueOf(y.get("HT"))); 
-                     response.put("AT", String.valueOf(a.get("AT")));
-                     json = new JSONObject(response);
-                 }                
-               });              
-            });      
-                  test.add(json);        
-        });          
-        return test;
+                        response2.put("date", String.valueOf(hby.get(i).get("date")));
+                        response2.put("HT", Double.parseDouble(hby.get(i).get("HT").toString()));
+                        response2.put("WT", Double.parseDouble("0"));
+                        response2.put("TTR", Double.parseDouble("0"));
+                        response2.put("nbre", Double.parseDouble("0"));
+                        response2.put("TDT", Double.parseDouble("0"));
+                        json2 = new JSONObject(response2);
+                test2.add(json2);
+            } 
+            System.out.println("heures :\n" + test2);
+            
+            List<JSONObject> finish = new ArrayList<>();
+            finish.addAll(test2);
+            finish.addAll(MTBF);
+            System.out.println("finish \n" + finish);
+            
+            Map<String, Double> results = finish.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((double)t.get("nbre"))))); 
+        
+        results.entrySet().stream()
+            .forEach(date -> {
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre1.add(json2);    
+            
+            });
+        System.err.println("hoooooo \n"+ nbre1);
+        Map<String, Double> tdtds = finish.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((double)g.get("TDT"))))); 
+        
+        tdtds.entrySet().stream()
+            .forEach(dates -> {
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth1.add(json2);  
+            
+            });
+        System.err.println("haaaaaaaa \n"+ tdth1);
+        Map<String, Double> wt1ds = finish.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((double)t.get("WT"))))); 
+        
+        wt1ds.entrySet().stream()
+            .forEach(datr -> {
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth1.add(json2);            
+            });
+        System.err.println("heeeeeeeee \n"+ wth1);
+        Map<String, Double> ttrss = finish.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((double)t.get("TTR"))))); 
+        
+        ttrss.entrySet().stream()
+            .forEach(datee -> {
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh1.add(json2);            
+            });
+        System.err.println("hiiiiiiiiii \n"+ ttrh1);
+        Map<String, Double> hours = finish.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((double)t.get("HT"))))); 
+        
+        hours.entrySet().stream()
+            .forEach(datee -> {
+            response2.put("date", datee.getKey());
+            response2.put("HT", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            hour.add(json2);            
+            });
+        System.err.println("huuuuuuuuuu \n"+ ttrh1);
+        nbre1.forEach(nbr->{
+            tdth1.forEach(tdr->{
+                wth1.forEach(wtsr->{
+                    ttrh1.forEach(ttr->{
+                        hour.forEach(htr->{                            
+                        
+                        String h = String.valueOf(nbr.get("date"));
+                        String ho = String.valueOf(htr.get("date"));
+                        String m = String.valueOf(tdr.get("date"));
+                        String x = String.valueOf(wtsr.get("date"));
+                        String y = String.valueOf(ttr.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y) && h.equals(ho)){
+                            response2.put("date", h);
+                            response2.put("nbre", (nbr.get("nbre")));
+                            response2.put("TDT", tdr.get("TDT"));
+                            response2.put("WT", wtsr.get("WT"));
+                            response2.put("TTR", ttr.get("TTR"));
+                            response2.put("HT", htr.get("HT"));
+                            json2 = new JSONObject(response2);
+                        }
+                        });
+                    });
+                });
+            });
+            test5.add(json2);
+        });
+        test7.addAll(test5);
+                        System.out.println("finals quarante \n" + test7); 
+        return test7;
 //        return hby;
     }
     

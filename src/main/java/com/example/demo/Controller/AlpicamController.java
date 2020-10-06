@@ -54,7 +54,7 @@ public class AlpicamController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -69,11 +69,19 @@ public class AlpicamController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }    
         return alpicamRepository.typePanneMonth(mts);
     }
@@ -97,13 +105,12 @@ public class AlpicamController {
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsAlpi(date1, date2);
         System.out.println("cette année:\n" + pby);
-         Map<String, Object> response2 = new HashMap<>();
+        Map<String, Object> response2 = new HashMap<>();
          List<JSONObject> nbre = new ArrayList<>();
          List<JSONObject> tdth = new ArrayList<>();
          List<JSONObject> wth = new ArrayList<>();
          List<JSONObject> ttrh = new ArrayList<>();
-         
-         
+                  
          if(!pby.isEmpty()){
              
          
@@ -232,6 +239,273 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now().minusYears(1);
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsAlpi(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/alpiThisYearRange")
+    public List<JSONObject> alpiThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){       
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsAlpi(date1, date2);
+        System.out.println("cette année:\n" + pby);
+        Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+                  
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/alpiLastYearRange")
+    public List<JSONObject> alpiLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsAlpi(date1, date2);
@@ -515,6 +789,542 @@ public class AlpicamController {
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsPlacage(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/placageThisYearRange")
+    public List<JSONObject> placageThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPlacage(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/placageLastYearRange")
+    public List<JSONObject> placageLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPlacage(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/brazilThisYearRange")
+    public List<JSONObject> brazilThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsBrazil(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/brazilLastYearRange")
+    public List<JSONObject> brazilLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsBrazil(date1, date2);
         System.out.println("date1:\n" + date1);
         System.out.println("date2:\n" + date2);
         System.out.println("cette année:\n" + pby);
@@ -1205,6 +2015,275 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/CPThisYearRange")
+    public List<JSONObject> CPThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsCP(date1, date2);
+        System.out.println("date1:\n" + date1 + "autre "+ date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/CPLastYearRange")
+    public List<JSONObject> CPLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsCP(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/scierieThisYear")
     public List<JSONObject> scierieThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -1353,6 +2432,274 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now().minusYears(1);
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsScierie(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/scierieThisYearRange")
+    public List<JSONObject> scierieThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsScierie(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("date", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("date", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/scierieLastYearRange")
+    public List<JSONObject> scierieLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsScierie(date1, date2);
@@ -1765,6 +3112,275 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/ligne1ThisYearRange")
+    public List<JSONObject> ligne1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/ligne1LastYearRange")
+    public List<JSONObject> ligne1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/ligne2ThisYear")
     public List<JSONObject> ligne2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -1913,6 +3529,274 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now().minusYears(1);
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/ligne2ThisYearRange")
+    public List<JSONObject> ligne2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/ligne2LastYearRange")
+    public List<JSONObject> ligne2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsLigne2(date1, date2);
@@ -2325,6 +4209,274 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/ligne3ThisYearRange")
+    public List<JSONObject> ligne3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/ligne3LastYearRange")
+    public List<JSONObject> ligne3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsLigne3(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechoirsThisYear")
     public List<JSONObject> sechoirsThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -2473,6 +4625,274 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now().minusYears(1);
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSechoirs(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechoirsThisYearRange")
+    public List<JSONObject> sechoirsThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSechoirs(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechoirsLastYearRange")
+    public List<JSONObject> sechoirsLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSechoirs(date1, date2);
@@ -3165,6 +5585,274 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/tapisDechetsThisYearRange")
+    public List<JSONObject> tapisDechetsThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTapisDéchets(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/tapisDechetsLastYearRange")
+    public List<JSONObject> tapisDechetsLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTapisDéchets(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/ecorcageThisYear")
     public List<JSONObject> ecorçageThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -3445,6 +6133,274 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/ecorcageThisYearRange")
+    public List<JSONObject> ecorçageThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEcorçage(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/ecorcageLastYearRange")
+    public List<JSONObject> ecorçageLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEcorçage(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encollageBrazilThisYear")
     public List<JSONObject> EncollageBrazilThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -3454,6 +6410,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEncollageBazil(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encollageBrazilThisYearRange")
+    public List<JSONObject> EncollageBrazilThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEncollageBazil(date1, date2);
@@ -3725,6 +6814,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encollageBrazilLastYearrange")
+    public List<JSONObject> EncollageBrazilLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEncollageBazil(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/tranchageThisYear")
     public List<JSONObject> tranchageThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -3734,6 +6958,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTranchage(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/tranchageThisYearRange")
+    public List<JSONObject> tranchageThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsTranchage(date1, date2);
@@ -4005,6 +7362,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/tranchageLastYearRange")
+    public List<JSONObject> tranchageLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTranchage(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/derouleuse1ThisYear")
     public List<JSONObject> derouleuse1ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -4014,6 +7506,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/derouleuse1ThisYearRange")
+    public List<JSONObject> derouleuse1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsD1(date1, date2);
@@ -4285,6 +7910,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/derouleuse1LastYearRange")
+    public List<JSONObject> derouleuse1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/derouleuse2ThisYear")
     public List<JSONObject> derouleuse2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -4294,6 +8054,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/derouleuse2ThisYearRange")
+    public List<JSONObject> derouleuse2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsD2(date1, date2);
@@ -4565,6 +8458,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/derouleuse2LastYearRange")
+    public List<JSONObject> derouleuse2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/derouleuse3ThisYear")
     public List<JSONObject> derouleuse3ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -4574,6 +8602,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/derouleuse3ThisYearRange")
+    public List<JSONObject> derouleuse3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsD3(date1, date2);
@@ -4845,6 +9006,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/derouleuse3LastYearRange")
+    public List<JSONObject> derouleuse3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsD3(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/bobineuse1ThisYear")
     public List<JSONObject> bobineuse1ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -4854,6 +9150,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/bobineuse1ThisYearRange")
+    public List<JSONObject> bobineuse1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsB1(date1, date2);
@@ -5125,6 +9554,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/bobineuse1LastYearRange")
+    public List<JSONObject> bobineuse1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/bobineuse2ThisYear")
     public List<JSONObject> bobineuse2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -5134,6 +9698,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/bobineuse2ThisYearRange")
+    public List<JSONObject> bobineuse2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsB2(date1, date2);
@@ -5405,6 +10102,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/bobineuse2LastYearRange")
+    public List<JSONObject> bobineuse2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/bobineuse3ThisYear")
     public List<JSONObject> bobineuse3ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -5544,20 +10376,284 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/bobineuse3ThisYearRange")
+    public List<JSONObject> bobineuse3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/bobineuse3LastYear")
     public List<JSONObject> bobineuse3LastYear(){
         Calendar cal = Calendar.getInstance();
         cal.setFirstDayOfWeek(0);
         int year = cal.get(Calendar.YEAR);
-        date1 = LocalDate.of(year - 1, Month.JANUARY, 01);
+        date1 = LocalDate.of(year-1, Month.JANUARY, 01);
         System.out.println("date1:\n" + date1);
-        date2 = LocalDate.now().minusYears(1);
+        date2 = LocalDate.now();
         
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsB3(date1, date2);
-        System.out.println("date1:\n" + date1);
-        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/bobineuse3LastYearRange")
+    public List<JSONObject> bobineuse3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsB3(date1, date2);
         System.out.println("cette année:\n" + pby);
          Map<String, Object> response2 = new HashMap<>();
          List<JSONObject> nbre = new ArrayList<>();
@@ -5694,6 +10790,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/magbob1ThisYearRange")
+    public List<JSONObject> magBob1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMB1(date1, date2);
@@ -5965,6 +11194,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/magbob1LastYearRange")
+    public List<JSONObject> magBob1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/magbob2ThisYear")
     public List<JSONObject> magBob2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -5974,6 +11338,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/magbob2ThisYearRange")
+    public List<JSONObject> magBob2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMB2(date1, date2);
@@ -6245,8 +11742,283 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/magbob2LastYearRange")
+    public List<JSONObject> magBob2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/magbob3ThisYear")
     public List<JSONObject> magBob3ThisYear(){
+        Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(0);
+        int year = cal.get(Calendar.YEAR);
+        date1 = LocalDate.of(year, Month.JANUARY, 01);
+        System.out.println("date1:\n" + date1);
+        date2 = LocalDate.now();
+        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/magbob3ThisYearRange")
+    public List<JSONObject> magBob3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         Calendar cal = Calendar.getInstance();
         cal.setFirstDayOfWeek(0);
         int year = cal.get(Calendar.YEAR);
@@ -6525,6 +12297,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/magbob3LastYearRange")
+    public List<JSONObject> magBob3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMB3(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massEZ1ThisYear")
     public List<JSONObject> massEZ1ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -6534,6 +12441,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massEZ1ThisYearRange")
+    public List<JSONObject> massEZ1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMEZ1(date1, date2);
@@ -6805,6 +12845,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massEZ1LastYearRange")
+    public List<JSONObject> massEZ1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massENThisYear")
     public List<JSONObject> massENThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -6814,6 +12989,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassEN(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massENThisYearRange")
+    public List<JSONObject> massENThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMassEN(date1, date2);
@@ -7085,6 +13393,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massENLastYearRange")
+    public List<JSONObject> massENLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassEN(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massEZ3ThisYear")
     public List<JSONObject> massEZ3ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -7094,6 +13537,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massEZ3ThisYearRange")
+    public List<JSONObject> massEZ3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMEZ3(date1, date2);
@@ -7365,6 +13941,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massEZ3LastYearRange")
+    public List<JSONObject> massEZ3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ3(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massEZ4ThisYear")
     public List<JSONObject> massEZ4ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -7374,6 +14085,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ4(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massEZ4ThisYearRange")
+    public List<JSONObject> massEZ4ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMEZ4(date1, date2);
@@ -7645,6 +14489,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massEZ4LastYearRange")
+    public List<JSONObject> massEZ4LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMEZ4(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massAThisYear")
     public List<JSONObject> massAThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -7654,6 +14633,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassA(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massAThisYearRange")
+    public List<JSONObject> massAThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMassA(date1, date2);
@@ -7925,6 +15037,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massALastYearRange")
+    public List<JSONObject> massALastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){        
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassA(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/massBThisYear")
     public List<JSONObject> massBThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -7934,6 +15181,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassB(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/massBThisYearRange")
+    public List<JSONObject> massBThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMassB(date1, date2);
@@ -8205,6 +15585,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/massBLastYearRange")
+    public List<JSONObject> massBLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsMassB(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechEZ1ThisYear")
     public List<JSONObject> sechEZ1ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -8214,6 +15729,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechEZ1ThisYearRange")
+    public List<JSONObject> sechEZ1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeEZ1(date1, date2);
@@ -8485,6 +16133,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechEZ1LastYearRange")
+    public List<JSONObject> sechEZ1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechEZ2ThisYear")
     public List<JSONObject> sechEZ2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -8494,6 +16277,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechEZ2ThisYearRange")
+    public List<JSONObject> sechEZ2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeEZ2(date1, date2);
@@ -8765,6 +16681,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechEZ2LastYearRange")
+    public List<JSONObject> sechEZ2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechEZ3ThisYear")
     public List<JSONObject> sechEZ3ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -8774,6 +16825,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ3(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechEZ3ThisYearRange")
+    public List<JSONObject> sechEZ3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeEZ3(date1, date2);
@@ -9045,6 +17229,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechEZ3LastYearRange")
+    public List<JSONObject> sechEZ3LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ3(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechEZ4ThisYear")
     public List<JSONObject> sechEZ4ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -9054,6 +17373,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ4(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechEZ4ThisYearRange")
+    public List<JSONObject> sechEZ4ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeEZ4(date1, date2);
@@ -9325,6 +17777,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechEZ4LastYearRange")
+    public List<JSONObject> sechEZ4LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEZ4(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechENThisYear")
     public List<JSONObject> sechENThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -9334,6 +17921,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEN(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechENThisYearRange")
+    public List<JSONObject> sechENThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeEN(date1, date2);
@@ -9605,6 +18325,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechENLastYearRange")
+    public List<JSONObject> sechENLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeEN(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/sechER24ThisYear")
     public List<JSONObject> sechER24ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -9614,6 +18469,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeER24(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/sechER24ThisYearRange")
+    public List<JSONObject> sechER24ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSeER24(date1, date2);
@@ -9885,6 +18873,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/sechER24LastYearRange")
+    public List<JSONObject> sechER24LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSeER24(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/scieBongThisYear")
     public List<JSONObject> scieBongThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -9894,6 +19017,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSBong(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/scieBongThisYearRange")
+    public List<JSONObject> scieBongThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsSBong(date1, date2);
@@ -10165,6 +19421,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/scieBongLastYearRange")
+    public List<JSONObject> scieBongLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsSBong(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse1BrazilThisYear")
     public List<JSONObject> encolleuse1BrazilThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -10174,6 +19565,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc1b(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse1BrazilThisYearRange")
+    public List<JSONObject> encolleuse1BrazilThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEnc1b(date1, date2);
@@ -10445,6 +19969,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse1BrazilLastYearRange")
+    public List<JSONObject> encolleuse1BrazilLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc1b(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse2BrazilThisYear")
     public List<JSONObject> encolleuse2BrazilThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -10454,6 +20113,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc2b(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse2BrazilThisYearRange")
+    public List<JSONObject> encolleuse2BrazilThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEnc2b(date1, date2);
@@ -10725,8 +20517,143 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse2BrazilLastYearRange")
+    public List<JSONObject> encolleuse2BrazilLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc2b(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse3BrazilThisYear")
-    public List<JSONObject> encolleuse3BrazilThisYear(){
+    public List<JSONObject> encolleuse3BrazilThisYear(){        
         Calendar cal = Calendar.getInstance();
         cal.setFirstDayOfWeek(0);
         int year = cal.get(Calendar.YEAR);
@@ -10734,6 +20661,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc3b(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse3BrazilThisYearRange")
+    public List<JSONObject> encolleuse3BrazilThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEnc3b(date1, date2);
@@ -11005,6 +21065,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse3BrazilLastYearRange")
+    public List<JSONObject> encolleuse3BrazilLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEnc3b(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse1CPThisYear")
     public List<JSONObject> encolleuse1CPThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -11014,6 +21209,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN1cp(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse1CPThisYearRange")
+    public List<JSONObject> encolleuse1CPThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEN1cp(date1, date2);
@@ -11285,6 +21613,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse1CPLastYearRange")
+    public List<JSONObject> encolleuse1CPLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN1cp(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse2CPThisYear")
     public List<JSONObject> encolleuse2CPThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -11294,6 +21757,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN2cp(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse2CPThisYearRange")
+    public List<JSONObject> encolleuse2CPThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEN2cp(date1, date2);
@@ -11565,6 +22161,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse2CPLastYearRange")
+    public List<JSONObject> encolleuse2CPLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN2cp(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/encolleuse3CPThisYear")
     public List<JSONObject> encolleuse3CPThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -11574,6 +22305,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN3cp(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/encolleuse3CPThisYearRange")
+    public List<JSONObject> encolleuse3CPThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsEN3cp(date1, date2);
@@ -11845,6 +22709,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/encolleuse3CPLastYearRange")
+    public List<JSONObject> encolleuse3CPLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsEN3cp(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/presseTeteThisYear")
     public List<JSONObject> presseTeteThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -11854,6 +22853,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPressTete(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/presseTeteThisYearRange")
+    public List<JSONObject> presseTeteThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsPressTete(date1, date2);
@@ -12125,6 +23257,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/presseTeteLastYearRange")
+    public List<JSONObject> presseTeteLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPressTete(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/trancheuse1ThisYear")
     public List<JSONObject> trancheuse1ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -12134,6 +23401,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTrancheuse1(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/trancheuse1ThisYearRange")
+    public List<JSONObject> trancheuse1ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsTrancheuse1(date1, date2);
@@ -12405,6 +23805,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/trancheuse1LastYearRange")
+    public List<JSONObject> trancheuse1LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTrancheuse1(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/trancheuse2ThisYear")
     public List<JSONObject> trancheuse2ThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -12414,6 +23949,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTrancheuse2(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/trancheuse2ThisYearRange")
+    public List<JSONObject> trancheuse2ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsTrancheuse2(date1, date2);
@@ -12685,6 +24353,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/trancheuse2LastYearRange")
+    public List<JSONObject> trancheuse2LastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsTrancheuse2(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
     @GetMapping("/presseSimiThisYear")
     public List<JSONObject> presseSimiThisYear(){
         Calendar cal = Calendar.getInstance();
@@ -12694,6 +24497,139 @@ public class AlpicamController {
         System.out.println("date1:\n" + date1);
         date2 = LocalDate.now();
         
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPresseSimi(date1, date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
+    @GetMapping("/presseSimiThisYearRange")
+    public List<JSONObject> presseSimiThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsPresseSimi(date1, date2);
@@ -12965,6 +24901,141 @@ public class AlpicamController {
         return MTBF2;
     }
     
+    @GetMapping("/presseSimiLastYearRange")
+    public List<JSONObject> presseSimiLastYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
+        List<JSONObject> pby = alpicamRepository.statsPresseSimi(date1, date2);
+        System.out.println("date1:\n" + date1);
+        System.out.println("date2:\n" + date2);
+        System.out.println("cette année:\n" + pby);
+         Map<String, Object> response2 = new HashMap<>();
+         List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         List<JSONObject> wth = new ArrayList<>();
+         List<JSONObject> ttrh = new ArrayList<>();
+         
+         
+         if(!pby.isEmpty()){
+             
+         
+         
+        Map<String, Integer> result = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", String.valueOf(date.getValue()));
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = pby.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("TDT", String.valueOf(dates.getValue()));
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        Map<String, Double> wt1d = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("WT")).doubleValue()))); 
+        
+        wt1d.entrySet().stream()
+            .forEach(datr -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datr.getKey());
+            response2.put("WT", String.valueOf(datr.getValue()));
+            json2 = new JSONObject(response2);
+            wth.add(json2);            
+            });
+        
+        Map<String, Double> ttrs = pby.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(t -> ((BigDecimal)t.get("TTR")).doubleValue()))); 
+        
+        ttrs.entrySet().stream()
+            .forEach(datee -> {
+//                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", datee.getKey());
+            response2.put("TTR", String.valueOf(datee.getValue()));
+            json2 = new JSONObject(response2);
+            ttrh.add(json2);            
+            });
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                wth.forEach(wts->{
+                    ttrh.forEach(tt->{
+                        String h = String.valueOf(nb.get("date"));
+                        String m = String.valueOf(td.get("date"));
+                        String x = String.valueOf(wts.get("date"));
+                        String y = String.valueOf(tt.get("date"));
+                        
+                        if(h.equals(m) && h.equals(x) && h.equals(y)){
+                            response2.put("date", h);
+                            response2.put("nbre", String.valueOf(nb.get("nbre").toString()));
+                            response2.put("TDT", String.valueOf(td.get("TDT").toString()));
+                            response2.put("WT", String.valueOf(wts.get("WT").toString()));
+                            response2.put("TTR", String.valueOf(tt.get("TTR").toString()));
+                            json2 = new JSONObject(response2);
+                        }
+                        
+                    });
+                });
+            });
+            MTBF.add(json2);
+        });
+            System.out.println("final \n" + MTBF);
+            
+            int n = 0;
+            double w = 0;
+            double dt = 0;
+            double tr = 0;
+            String date = "";
+            
+            for(int i = 0; i<MTBF.size(); i++){
+                date = MTBF.get(i).get("date").toString();
+                n += Integer.parseInt(MTBF.get(i).get("nbre").toString());
+                w += Double.parseDouble(MTBF.get(i).get("WT").toString());
+                dt += Double.parseDouble(MTBF.get(i).get("TDT").toString());
+                tr += Double.parseDouble(MTBF.get(i).get("TTR").toString());
+            }
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", n);
+            response2.put("TDT", dt);
+            response2.put("WT", w);
+            response2.put("TTR", tr);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+            
+            }else{
+            response2.put("dates", date2.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+            response2.put("nbre", 0);
+            response2.put("TDT", 0);
+            response2.put("WT", 0);
+            response2.put("TTR", 0);
+            json = new JSONObject(response2);
+            MTBF2.add(json);
+         }
+            
+        return MTBF2;
+    }
+    
  
     @GetMapping("/paretoAlpiRange")
     public List<JSONObject> ParetoThisYear(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
@@ -13036,7 +25107,7 @@ public class AlpicamController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("this month: "+ mts);
             }else{
@@ -13109,11 +25180,19 @@ public class AlpicamController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("this month: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }         
             
             List<JSONObject> MTBF = new ArrayList<>();
@@ -13284,8 +25363,17 @@ public class AlpicamController {
             response.put("date", MTBF.get(i).get("date"));
             response.put("nbre", MTBF.get(i).get("nbre"));
             response.put("TDT", MTBF.get(i).get("TDT"));
-            response.put("TTR", MTBF.get(i).get("TTR"));
-            response.put("WT", MTBF.get(i).get("WT"));
+//            response.put("TTR", MTBF.get(i).get("TTR"));
+//            response.put("WT", MTBF.get(i).get("WT"));
+            if(x == 0){
+                response.put("WT", 0);
+                response.put("TTR", 0);
+                response.put("MDT", 0);
+            }else{
+                response.put("WT", x3/x);
+                response.put("TTR", x2/x);
+                response.put("MDT", x1/x);
+            }
             if(x==0 && y==0)
             response.put("taux", 0);
             if(x==0 && y!=0)
@@ -13297,12 +25385,16 @@ public class AlpicamController {
             
             if(x1==0 && y1==0)
             response.put("taux_TDT", 0);
+            response.put("taux_MDT", 0);
             if(x1==0 && y1!=0)
             response.put("taux_TDT", -100);
+            response.put("taux_MDT", -100);
             if(x1!=0 && y1==0)
             response.put("taux_TDT", 100);
+            response.put("taux_MDT", 100);
             if(x1!=0 && y1!=0)
             response.put("taux_TDT", ((x1/y1)-1)*100);
+            response.put("taux_MDT", (((x1/x)/(y1/y))-1)*100);
             
             if(x2==0 && y2==0)
             response.put("taux_TTR", 0);
@@ -13311,7 +25403,7 @@ public class AlpicamController {
             if(x2!=0 && y2==0)
             response.put("taux_TTR", 100);
             if(x2!=0 && y2!=0)
-            response.put("taux_TTR", ((x2/y2)-1)*100);
+            response.put("taux_TTR", ((x2/x)/(y2/y)-1)*100);
             
             if(x3==0 && y3==0)
             response.put("taux_WT", 0);
@@ -13320,7 +25412,7 @@ public class AlpicamController {
             if(x3!=0 && y3==0)
             response.put("taux_WT", 100);
             if(x3!=0 && y3!=0)
-            response.put("taux_WT", ((x3/y3)-1)*100);
+            response.put("taux_WT", ((x3/x)/(y3/y)-1)*100);
             
             json = new JSONObject(response);
             MTBF2.add(json);

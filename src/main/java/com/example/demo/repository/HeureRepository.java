@@ -34,7 +34,7 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
     @Query(value=hourRange, nativeQuery = true)
     public List<JSONObject> HeuresRange(LocalDate date1, LocalDate date2);
 
-    String hourbydepMachine = "SELECT h.date as date, m.nom, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
+    String hourbydepMachine = "SELECT h.date as date, m.nom, m.code, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
         "count(a.numero) as nbre,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
         "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
@@ -42,12 +42,12 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
         "join lignes l on l.id_ligne = m.id_ligne\n" +
         "join departement d on d.id_departement = l.id_departement\n" +
         "where h.date = ?1 and d.nom = ?2\n" +
-        "GROUP by m.nom, h.date ORDER BY h.date DESC";
+        "GROUP by m.nom, h.date ORDER BY m.nom";
   
     @Query(value=hourbydepMachine, nativeQuery = true)
     public List<JSONObject> HeuresByDepMachine(LocalDate date, String dep);
 
-    String hourbydepMachineMonth = "SELECT h.date as date, m.nom, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
+    String hourbydepMachineMonth = "SELECT h.date as date, m.nom, m.code, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
         "count(a.numero) as nbre,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
         "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
@@ -55,12 +55,12 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
         "join lignes l on l.id_ligne = m.id_ligne\n" +
         "join departement d on d.id_departement = l.id_departement\n" +
         "where date_format(h.date, '%Y-%m') = ?1 and d.nom = ?2\n" +
-        "GROUP by m.nom, h.date ORDER BY h.date DESC";
+        "GROUP by m.nom, h.date ORDER BY m.nom";
   
     @Query(value=hourbydepMachineMonth, nativeQuery = true)
     public List<JSONObject> HeuresByDepMachineMonth(String date, String dep);
 
-    String hourbydep = "SELECT h.date as date, m.nom, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
+    String hourbydep = "SELECT h.date as date, m.nom, m.code, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
         "count(a.numero) as nbre,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
         "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
@@ -68,7 +68,7 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
         "join lignes l on l.id_ligne = m.id_ligne\n" +
         "join departement d on d.id_departement = l.id_departement\n"
             + "where h.date = ?1 " +
-        "GROUP by d.nom, h.date ORDER BY h.date DESC";
+        "GROUP by d.nom, h.date ORDER BY m.nom";
   
     @Query(value=hourbydep, nativeQuery = true)
     public List<JSONObject> HeuresByDep(LocalDate date);
@@ -96,4 +96,13 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
     @Query(value=machbydep, nativeQuery = true)
     public List<JSONObject> MachinesByDep();
 
+    String machinebydep = "SELECT d.nom, m.nom as mach, m.code \n" +
+        "FROM machines m \n" +
+        "join lignes l on m.id_ligne = l.id_ligne\n" +
+        "join departement d on d.id_departement = l.id_departement\n" +
+        "where m.localisation like 'bonabe%' and d.nom = ?1 "
+            + "order by m.nom asc";
+  
+    @Query(value=machinebydep, nativeQuery = true)
+    public List<JSONObject> MachByDep(String dep);
 }

@@ -638,7 +638,7 @@ public class PanneController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if((month+1) < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -728,14 +728,19 @@ public class PanneController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if((month + 1)< 10){
                 if(month == 0){
                     mts = String.valueOf(year - 1)+"/12";
                 }else{
                     mts = String.valueOf(year)+"/0"+ String.valueOf(month);
                 }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             System.out.println("mois passé: "+ mts);
 //		return panneRepository.MonthPannes(mts);
@@ -1011,7 +1016,7 @@ public class PanneController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
+            if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
             System.out.println("ce mois: "+ mts);
             }else{
@@ -1026,11 +1031,19 @@ public class PanneController {
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
             int year = cal.get(Calendar.YEAR);
-            if(month < 10){
-                mts = String.valueOf(year)+"/0"+ String.valueOf(month);
-            System.out.println("ce mois: "+ mts);
+            if((month + 1)< 10){
+                if(month == 0){
+                    mts = String.valueOf(year - 1)+"/12";
+                }else{
+                    mts = String.valueOf(year)+"/0"+ String.valueOf(month);
+                }                
             }else{
-                mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                if((month+1) == 10){
+                    mts = String.valueOf(year)+"/09";
+                }else{
+                    mts = String.valueOf(year)+"/"+ String.valueOf(month);
+                }
+//                mts = String.valueOf(year)+"/"+ String.valueOf(month);
             }
             return panneRepository.TotalLPannes(mts);
         } 
