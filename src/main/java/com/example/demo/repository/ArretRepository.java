@@ -16,7 +16,7 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
     Arrets findByNumero(String numero);
     
     String quer1 = "SELECT "
-            + "m.nom as machine, m.code, m.id_machine, a.id_arret, a.created_at, "
+            + "m.nom as machine, m.code, m.id_machine, a.id_arret as idArret, a.created_at, "
             + "a.date, a.numero, a.cause, a.debut_arret, a.fin_arret, "
             + "coalesce(sum(distinct timestampdiff(Minute, a.debut_arret, a.fin_arret)), 0) as DT \n" 
             + "FROM Arrets a "
@@ -28,8 +28,9 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
     public List<JSONObject> TousLesArrets();
     
     String arretThisMonth = "SELECT "
-            + "m.nom as machine, m.code, m.id_machine, a.id_arret, a.created_at, "
-            + "a.date, a.numero, a.cause, a.debut_arret, a.fin_arret "
+            + "m.nom as machine, m.code, m.id_machine, a.id_arret as idArret, a.created_at, "
+            + "a.date, a.numero, a.cause, a.debut_arret, a.fin_arret, "
+            + "coalesce(sum(distinct timestampdiff(Minute, a.debut_arret, a.fin_arret)), 0) as DT \n" 
             + "FROM Arrets a "
             + "JOIN machines m on (a.id_machine = m.id_machine and m.label like 'corr%' and m.localisation like 'bonaber%') "
             + "where date_format(a.date, '%Y/%m') = ?1 "
@@ -61,8 +62,9 @@ public interface ArretRepository extends JpaRepository<Arrets, Long>{
     public List<JSONObject> ArretYear(int date);
     
     String arretRange = "SELECT "
-            + "m.nom as machine, m.code, m.id_machine, a.id_arret, a.created_at, "
-            + "a.date, a.numero, a.cause, a.debut_arret, a.fin_arret "
+            + "m.nom as machine, m.code, m.id_machine, a.id_arret as idArret, a.created_at, "
+            + "a.date, a.numero, a.cause, a.debut_arret, a.fin_arret, "
+            + "coalesce(sum(distinct timestampdiff(Minute, a.debut_arret, a.fin_arret)), 0) as DT \n" 
             + "FROM Arrets a "
             + "JOIN machines m on (a.id_machine = m.id_machine and m.label like 'corr%' and m.localisation like 'bonaber%') "
             + "where a.date between ?1 and ?2 "

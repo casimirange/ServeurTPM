@@ -12019,13 +12019,6 @@ public class AlpicamController {
     @GetMapping("/magbob3ThisYearRange")
     public List<JSONObject> magBob3ThisYearRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut") LocalDate date1, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin") LocalDate date2){
-        Calendar cal = Calendar.getInstance();
-        cal.setFirstDayOfWeek(0);
-        int year = cal.get(Calendar.YEAR);
-        date1 = LocalDate.of(year, Month.JANUARY, 01);
-        System.out.println("date1:\n" + date1);
-        date2 = LocalDate.now();
-        
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> pby = alpicamRepository.statsMB3(date1, date2);

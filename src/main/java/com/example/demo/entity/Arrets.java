@@ -24,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -56,6 +57,7 @@ public class Arrets implements Serializable{
 
     private String cause;
 
+    @Column(unique = true)
     private String numero;
 
     public Arrets() {

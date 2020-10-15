@@ -134,6 +134,7 @@ public class HeureController {
         machine.forEach(x ->{
             response2.put("mach", x.get("nom"));
             response2.put("code", x.get("code"));
+            response2.put("etat", x.get("etat"));
             json = new JSONObject(response2);
             MTBF.add(json);
         });
@@ -143,6 +144,7 @@ public class HeureController {
         machines.forEach(t ->{
             response2.put("mach", t.get("mach"));
             response2.put("code", t.get("code"));
+            response2.put("etat", t.get("etat"));
             json = new JSONObject(response2);
             MTBF2.add(json);
         });
@@ -171,6 +173,7 @@ public class HeureController {
         machine.forEach(x ->{
             response2.put("mach", x.get("nom"));
             response2.put("code", x.get("code"));
+            response2.put("etat", x.get("etat"));
             json = new JSONObject(response2);
             MTBF.add(json);
         });
@@ -180,6 +183,7 @@ public class HeureController {
         machines.forEach(t ->{
             response2.put("mach", t.get("mach"));
             response2.put("code", t.get("code"));
+            response2.put("etat", t.get("etat"));
             json = new JSONObject(response2);
             MTBF2.add(json);
         });
@@ -209,6 +213,7 @@ public class HeureController {
         machine.forEach(x ->{
             response2.put("mach", x.get("nom"));
             response2.put("code", x.get("code"));
+            response2.put("etat", x.get("etat"));
             json = new JSONObject(response2);
             MTBF.add(json);
         });
@@ -218,6 +223,7 @@ public class HeureController {
         machines.forEach(t ->{
             response2.put("mach", t.get("mach"));
             response2.put("code", t.get("code"));
+            response2.put("etat", t.get("etat"));
             json = new JSONObject(response2);
             MTBF2.add(json);
         });

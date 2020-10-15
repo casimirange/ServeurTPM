@@ -348,6 +348,46 @@ public class DashboardController {
         return dashboardRepository.TotalLPannes(mts);
     }  
     
+    @GetMapping("/recapMonth")
+    public List<JSONObject> recap(){
+        List<JSONObject> ceMois = countAll();
+        List<JSONObject> moisPassé = countPassMonth();
+        List<JSONObject> rec = new ArrayList<>();
+        Map<String,Object> response = new HashMap<>();
+        System.out.println("ce mois: "+ ceMois);
+        System.out.println("mois dernier: "+ moisPassé);
+        
+        double nb_lm = 0;
+        double nb_tm = 0;
+        
+        for(int i = 0; i < countAll().size(); i++){
+            nb_tm = nb_tm + Integer.parseInt(countAll().get(i).get("nbre").toString());
+        }
+        
+        for(int i = 0; i < countPassMonth().size(); i++){
+            nb_lm = nb_lm + Integer.parseInt(countPassMonth().get(i).get("nbre").toString());
+        }
+        
+        response.put("thisMonthFailure", (int)nb_tm);
+        response.put("lastMonthFailure", (int)nb_lm);
+        if(nb_tm==0 && nb_lm==0){
+            response.put("taux", 0);
+        }
+        else if(nb_tm==0 && nb_lm!=0){
+            response.put("taux", -100);
+        }
+        else if(nb_tm!=0 && nb_lm==0){
+            response.put("taux", 100);
+        }
+        else if(nb_tm!=0 && nb_lm!=0){
+            response.put("taux", ((nb_tm/nb_lm)-1)*100);
+        }
+
+        json = new JSONObject(response);
+        rec.add(json);
+        return rec;
+    }
+    
     
     @GetMapping("/countThisYear")
     public List<JSONObject> countThisYear(){
@@ -1027,6 +1067,18 @@ public class DashboardController {
         });           
         
         return test;
+    }
+    
+    @GetMapping("/MTBFAlpi")
+    public List<JSONObject> MTBFAlpi(){
+        List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF_ty = MTBFThisYearAlpi();
+        LinkedHashSet<JSONObject> MTBF_by = MTBFTByYearAlpi();
+        
+        MTBF.addAll(MTBF_by);
+        MTBF.addAll(MTBF_ty);
+        
+        return MTBF;
     }
     
     @GetMapping("/heuresByYear")

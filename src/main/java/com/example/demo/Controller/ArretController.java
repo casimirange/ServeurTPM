@@ -96,13 +96,18 @@ public class ArretController {
     
     @PutMapping("/{numero}")
     public void updatePanne(@RequestBody ArretModel arretModel, @PathVariable String numero) {
-            Arrets arret = new Arrets(
-                    arretModel.getDate(), 
-                    arretModel.getDebutArret(), 
-                    arretModel.getFinArret(), 
-                    arretModel.getCause(),
-                    arretModel.getNumero());
-            arretService.updateArret(arret, arretModel.getIdMachine());
+        Arrets arr = arretRepository.findByNumero(numero);
+        arr.setCause(arretModel.getCause());
+        arr.setDate(arretModel.getDate());
+        arr.setDebut_arret(arretModel.getDebutArret());
+        arr.setFin_arret(arretModel.getFinArret());
+//            Arrets arret = new Arrets(
+//                    arretModel.getDate(), 
+//                    arretModel.getDebutArret(), 
+//                    arretModel.getFinArret(), 
+//                    arretModel.getCause(),
+//                    arretModel.getNumero());
+            arretService.updateArret(arr, arretModel.getIdMachine());
     }
         	
     @GetMapping("/{id}")
@@ -169,6 +174,7 @@ public class ArretController {
         Calendar cal = Calendar.getInstance();
             cal.setFirstDayOfWeek(0);
             int month = cal.get(Calendar.MONTH);
+            System.out.println("ce moisssss: "+ month);
             int year = cal.get(Calendar.YEAR);
             if(month+1 < 10){
                 mts = String.valueOf(year)+"/0"+ String.valueOf(month+1);
@@ -177,6 +183,7 @@ public class ArretController {
                 mts = String.valueOf(year)+"/"+ String.valueOf(month+1);
             }
             List<JSONObject> Allpannes = arretRepository.ArretTypeMonth(mts);
+            System.out.println("vraiment\n"+Allpannes);
             Map<String, Object> response2 = new HashMap<>();
             List<JSONObject> MTBF2 = new ArrayList<>();
             List<JSONObject> MTBF = new ArrayList<>();
@@ -184,7 +191,7 @@ public class ArretController {
             List<JSONObject> tdth = new ArrayList<>();
             
             Allpannes.forEach(x -> {
-                String t = x.get("cause").toString();
+                String t = x.getAsString("cause");
                 if(!t.equals("Délestage") && !t.equals("Bourrage") && !t.equals("Manque de Bobine") 
                         && !t.equals("Manque de Personnel") && !t.equals("Manque de Matériel")){
                     type = "Divers";
@@ -678,6 +685,8 @@ public class ArretController {
     @GetMapping("/recapArret")
     public List<JSONObject> Recap(){
         List<JSONObject> pty = arretRepository.RecapPanne();
+        List<JSONObject> lm = showLAstMonthArret();
+        List<JSONObject> tm = showThisMonthArret();
         List<JSONObject> MTBF = new ArrayList<>();            
         List<JSONObject> MTBF2 = new ArrayList<>();            
         Map<String,Object> response = new HashMap<>();
@@ -717,13 +726,13 @@ public class ArretController {
             System.out.println("final \n" + MTBF);
           
         
-        for (int i = 0; i < MTBF.size()-1; i++){
-            double x = (Integer.parseInt(MTBF.get(i).get("nbre").toString()));
-            double y = (Integer.parseInt(MTBF.get(i+1).get("nbre").toString()));
+//        for (int i = 0; i < MTBF.size()-1; i++){
+            double y = lm.size();
+            double x = tm.size();
+            int x1 = tm.size();
             
-//            response.put("annee", pty.get(i).get("annee"));
-            response.put("date", MTBF.get(i).get("date"));
-            response.put("nbre", MTBF.get(i).get("nbre"));
+            response.put("lm", y);
+            response.put("nbre", x1);
             if(x==0 && y==0)
             response.put("taux", 0);
             if(x==0 && y!=0)
@@ -736,7 +745,7 @@ public class ArretController {
             json = new JSONObject(response);
             MTBF2.add(json);
             
-        }
+//        }
         System.out.println("récapitulatif: \n" + MTBF2);
         
         return MTBF2;

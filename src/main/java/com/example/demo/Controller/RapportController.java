@@ -3428,7 +3428,7 @@ public class RapportController {
     @GetMapping("/MagBob2")
     public List<JSONObject> MagBob2(){
         List<JSONObject> alty = alpi.magBob2ThisYear();
-    List<JSONObject> ally = alpi.magBob1LastYear();
+    List<JSONObject> ally = alpi.magBob2LastYear();
     Map<String, Object> response = new HashMap<>(); 
     List<JSONObject> MTBF2 = new ArrayList<>();
     for (int i = 0; i < alty.size(); i++){
@@ -3523,7 +3523,7 @@ public class RapportController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
         List<JSONObject> alty = alpi.magBob2ThisYearRange(date3, date4);
-    List<JSONObject> ally = alpi.magBob1LastYearRange(date1, date2);
+    List<JSONObject> ally = alpi.magBob2LastYearRange(date1, date2);
     Map<String, Object> response = new HashMap<>(); 
     List<JSONObject> MTBF2 = new ArrayList<>();
     for (int i = 0; i < alty.size(); i++){
