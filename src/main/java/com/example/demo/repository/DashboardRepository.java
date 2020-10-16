@@ -69,8 +69,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
     String countThisYear = "SELECT count(DISTINCT p.numero) as nbre "
             + "FROM Pannes p "
             + "join machines m on p.id_machine = m.id_machine "
-            + "where DATE_FORMAT(p.date, '%Y') = ?1 and m.label like 'corr%' and m.localisation like 'bonab%' "
-//            + "and p.dt > 15 "
+            + "where DATE_FORMAT(p.date, '%Y') = ?1 and m.localisation like 'bonab%' "
             + "and m.label = 'correctif' ";
   
     @Query( value=countThisYear, nativeQuery = true)

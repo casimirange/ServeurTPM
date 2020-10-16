@@ -1234,4 +1234,26 @@ public interface DepartementRepository extends JpaRepository<Departement, Long>{
     
     @Query(value = EncolleuseThisMonth, nativeQuery = true) 
     public List<JSONObject> EncolleuseParetoThisMonth(String date, Long dep);
+    
+    String totalThisYear = "SELECT count(DISTINCT p.numero) as nbre, date_format(p.date, '%Y') as date, "
+            + "COALESCE(sum(DISTINCT timestampdiff(minute, p.heure_arret, p.fin_inter)), 0) as TDT \n"
+            + "FROM Pannes p "
+            + "join machines m on p.id_machine = m.id_machine "
+            + "JOIN lignes l on l.id_ligne = m.id_ligne \n" 
+            + "join departement d on d.id_departement = l.id_departement \n"
+            + "where DATE_FORMAT(p.date, '%Y') = ?1 and d.id_departement = ?2 and m.label like 'corr%' and m.localisation like 'bonab%' "
+            + "group by p.numero ";
+  
+    @Query( value=totalThisYear, nativeQuery = true)
+    public List<JSONObject> countThisYear(String date, Long dep);
+    
+    String THisYearhourDep = "SELECT SUM(h.heure) as heure, d.nom, date_format(h.date, '%Y') as date "
+            + "FROM heures h "
+            + "join machines m on m.id_machine = h.id_machine "
+            + "JOIN lignes l on l.id_ligne = m.id_ligne "
+            + "join departement d on d.id_departement = l.id_departement "
+            + "WHERE date_format(h.date, '%Y') = ?1 and d.id_departement = ?2  and d.localisation like 'bonab%' ";
+    
+    @Query(value = THisYearhourDep, nativeQuery = true)
+    List<JSONObject> ThisYearHourDep(String date, Long x); 
 }

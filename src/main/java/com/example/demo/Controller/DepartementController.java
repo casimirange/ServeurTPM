@@ -13524,4 +13524,81 @@ List<JSONObject> MTBF = new ArrayList<>();
                         System.out.println("finalité \n" + dash);
         return dash;
     }    
+    
+    @GetMapping("/countThisYear/{dep}")
+    public List<JSONObject> countThisYear(@PathVariable Long dep){
+        Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(0);
+            int year = cal.get(Calendar.YEAR);
+            mts = String.valueOf(year);               
+            
+        List<JSONObject> dash = new ArrayList<>();
+        List<JSONObject> test = departementRepository.countThisYear(mts, dep);
+        List<JSONObject> hour = departementRepository.ThisYearHourDep(mts, dep);
+        List<JSONObject> nbre = new ArrayList<>();
+         List<JSONObject> tdth = new ArrayList<>();
+         Map<String, Object> response2 = new HashMap<>();
+         
+         
+        Map<String, Integer> result = test.stream().collect(
+            Collectors.groupingBy(e -> e.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingInt(t -> ((BigInteger)t.get("nbre")).intValue()))); 
+        
+        result.entrySet().stream()
+            .forEach(date -> {
+                System.out.println("test de date " + date.getKey() + " = " + date.getValue()); 
+            response2.put("date", date.getKey());
+            response2.put("nbre", date.getValue());
+            json2 = new JSONObject(response2);
+            nbre.add(json2);            
+            });
+        
+        Map<String, Double> tdtd = test.stream().collect(
+            Collectors.groupingBy(f -> f.get("date").toString(),
+            LinkedHashMap::new,
+            Collectors.summingDouble(g -> ((BigDecimal)g.get("TDT")).doubleValue()))); 
+        
+        tdtd.entrySet().stream()
+            .forEach(dates -> {
+                System.out.println("test de date " + dates.getKey() + " = " + dates.getValue()); 
+            response2.put("date", dates.getKey());
+            response2.put("dt", dates.getValue());
+            json2 = new JSONObject(response2);
+            tdth.add(json2);            
+            });
+        
+        
+        nbre.forEach(nb->{
+            tdth.forEach(td->{
+                hour.forEach(hr->{                    
+                
+                String h = String.valueOf(nb.get("date"));
+                String m = String.valueOf(td.get("date"));
+                String t = String.valueOf(td.get("date"));
+
+                double y = (Integer.parseInt(nb.get("nbre").toString()));
+                double x = (Double.parseDouble(td.get("dt").toString()));
+                        
+                if(h.equals(m) && h.equals(t)){
+                    response2.put("date", h);
+                    response2.put("nbre", nb.get("nbre"));
+                    response2.put("TDT", td.get("dt"));
+                    response2.put("hour", hr.get("heure"));
+                    
+                    if(y == 0){
+                        response2.put("MDT", 0);
+                    }else{
+                        response2.put("MDT", x/y);
+                    }
+                    json2 = new JSONObject(response2);
+                }
+                });       
+            });
+            dash.add(json2);
+        });
+                        System.out.println("finalité \n" + dash);
+        return dash;
+    }    
+    
 }
