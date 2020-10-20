@@ -77,11 +77,11 @@
                         <scope>runtime</scope>
 		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
@@ -160,10 +160,10 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-                                <configuration>
+                                <!--<configuration>
                                     <source>1.8</source>
                                     <target>1.8</target>
-                                  </configuration>
+                                  </configuration>-->
 			</plugin>
                         <!--<plugin>
     <groupId>org.apache.maven.plugins</groupId>
