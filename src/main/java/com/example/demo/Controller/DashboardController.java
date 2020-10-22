@@ -722,7 +722,7 @@ public class DashboardController {
 //    }
     
     @GetMapping("/mtbfByYear")
-    public List<JSONObject> MTBFTByYearAlpi(){        
+    public LinkedHashSet<JSONObject> MTBFTByYearAlpi(){        
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> hby = dashboardRepository.hourByYear();
         List<JSONObject> pby = dashboardRepository.PByYear();
@@ -737,7 +737,7 @@ public class DashboardController {
             List<JSONObject> tdth1 = new ArrayList<>();
             List<JSONObject> wth1 = new ArrayList<>();
             List<JSONObject> ttrh1 = new ArrayList<>();
-            List<JSONObject> test7 = new ArrayList<>();
+            LinkedHashSet<JSONObject> test7 = new LinkedHashSet<>();
             List<JSONObject> test5 = new ArrayList<>();
          
         Map<String, Integer> result = pby.stream().collect(
@@ -1072,14 +1072,32 @@ public class DashboardController {
     @GetMapping("/MTBFAlpi")
     public List<JSONObject> MTBFAlpi(){
         List<JSONObject> MTBF = new ArrayList<>();
+        List<JSONObject> MTBF2 = new ArrayList<>();
         List<JSONObject> MTBF_ty = MTBFThisYearAlpi();
-        List<JSONObject> MTBF_by = MTBFTByYearAlpi();
+        LinkedHashSet<JSONObject> MTBF_by = MTBFTByYearAlpi();
         System.out.println("Liste 1:\n" + MTBF_ty);
         System.out.println("Liste 2:\n" + MTBF_by);
-        MTBF.addAll(MTBF_by);
-        MTBF.addAll(MTBF_ty);
-        System.out.println("Liste 2:\n" + MTBF_by);
-        return MTBF;
+//        MTBF.addAll(MTBF_by);
+//        MTBF.addAll(MTBF_ty);
+//        System.out.println("Liste 2:\n" + MTBF_by);
+        
+         Map<String,Object> response = new HashMap<>();
+        
+        MTBF_by.forEach(a->{                      
+                     response.put("date", String.valueOf(a.get("date")));
+                     response.put("nbre", String.valueOf(a.get("nbre")));
+                     response.put("TDT", String.valueOf(a.get("TDT")));
+                     response.put("WT", String.valueOf(a.get("WT")));
+                     response.put("TTR", String.valueOf(a.get("TTR")));
+                     response.put("HT", String.valueOf(a.get("HT")));
+                     json = new JSONObject(response);
+                 MTBF.add(json);
+        });
+        
+        MTBF2.addAll(MTBF);
+        MTBF2.addAll(MTBF_ty);
+        System.out.println("Liste 3:\n" + MTBF2);
+        return MTBF2;
     }
     
     @GetMapping("/heuresByYear")

@@ -37,16 +37,17 @@ public class RapportController {
     
     
     @GetMapping("/MTBFAlpi")
-    public List<JSONObject> MTBFAlpi(){        
+    public List<JSONObject> MTBFAlpi(){      
+        System.out.println("massaa!!!!"); 
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF_ty = dash.MTBFThisYearAlpi();
-        List<JSONObject> MTBF_by = dash.MTBFTByYearAlpi();
+//        List<JSONObject> MTBF_by = dash.MTBFTByYearAlpi();
         System.out.println("Liste 1:\n" + MTBF_ty);
-        System.out.println("Liste 2:\n" + MTBF_by);
-        MTBF.addAll(MTBF_by);
-        MTBF.addAll(MTBF_ty);
-        System.out.println("Liste 2:\n" + MTBF);
-        return MTBF;
+//        System.out.println("Liste 2:\n" + MTBF_by);
+//        MTBF_by.addAll(MTBF_ty);
+//        MTBF.addAll(MTBF_by);
+//        System.out.println("Liste 3:\n" + MTBF);
+        return MTBF_ty;
     }
     
     @GetMapping("/alpicam")
