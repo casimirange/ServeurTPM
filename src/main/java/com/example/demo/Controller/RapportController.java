@@ -985,6 +985,17 @@ public class RapportController {
         return MTBF2;
     }
     
+    @GetMapping("/ridottos")
+    public List<JSONObject> Ridottos(){
+        List<JSONObject> ridotto = new ArrayList<>();
+        ridotto.addAll(Alpi());
+        ridotto.addAll(Brazil());
+        ridotto.addAll(Contreplaque());
+        ridotto.addAll(Placage());
+        ridotto.addAll(Scierie());
+        return ridotto;
+    }    
+    
     @GetMapping("/ridotto")
     public List<JSONObject> Ridotto(){
         List<JSONObject> ridotto = new ArrayList<>();
@@ -998,6 +1009,20 @@ public class RapportController {
     
     @GetMapping("/ridottoRange")
     public List<JSONObject> RidottoRange(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
+        List<JSONObject> ridotto = new ArrayList<>();
+        ridotto.addAll(AlpiRange(date1, date2, date3, date4));
+        ridotto.addAll(BrazilRange(date1, date2, date3, date4));
+        ridotto.addAll(ContreplaqueRange(date1, date2, date3, date4));
+        ridotto.addAll(PlacageRange(date1, date2, date3, date4));
+        ridotto.addAll(ScierieRange(date1, date2, date3, date4));
+        return ridotto;
+    }    
+    
+    @GetMapping("/ridottoRanges")
+    public List<JSONObject> RidottoRanges(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
@@ -6059,6 +6084,78 @@ public class RapportController {
         return MTBF2;
     }
     
+    @GetMapping("/ridottos/placage")
+    public List<JSONObject> RapportPlacages(){
+        List<JSONObject> placage = new ArrayList<>();
+        placage.addAll(Placage());
+        placage.addAll(Ecorçage());
+        placage.addAll(TapisDechets());
+        placage.addAll(Ligne1());
+        placage.addAll(Derouleuse1());
+        placage.addAll(Bobineuse1());
+        placage.addAll(MagBob1());
+        placage.addAll(MassicotEN());
+        placage.addAll(MassicotEZ1());
+        placage.addAll(Ligne2());
+        placage.addAll(Derouleuse2());
+        placage.addAll(Bobineuse2());
+        placage.addAll(MagBob2());
+        placage.addAll(MassicotA());
+        placage.addAll(MassicotB());
+        placage.addAll(Ligne3());
+        placage.addAll(Derouleuse3());
+        placage.addAll(Bobineuse3());
+        placage.addAll(MagBob3());
+        placage.addAll(MassicotEZ3());
+        placage.addAll(MassicotEZ4());
+        placage.addAll(Sechoirs());
+        placage.addAll(SechoirEN());
+        placage.addAll(SechoirEZ1());
+        placage.addAll(SechoirEZ2());
+        placage.addAll(SechoirEZ3());
+        placage.addAll(SechoirEZ4());
+        placage.addAll(SechoirER24());
+        return placage;
+    }
+    
+    @GetMapping("/ridottos/placageRange")
+    public List<JSONObject> RapportPlacageRanges(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
+        List<JSONObject> placage = new ArrayList<>();
+        placage.addAll(PlacageRange(date1, date2, date3, date4));
+        placage.addAll(EcorçageRange(date1, date2, date3, date4));
+        placage.addAll(TapisDechetsRange(date1, date2, date3, date4));
+        placage.addAll(Ligne1Range(date1, date2, date3, date4));
+        placage.addAll(Derouleuse1Range(date1, date2, date3, date4));
+        placage.addAll(Bobineuse1Range(date1, date2, date3, date4));
+        placage.addAll(MagBob1Range(date1, date2, date3, date4));
+        placage.addAll(MassicotENRange(date1, date2, date3, date4));
+        placage.addAll(MassicotEZ1Range(date1, date2, date3, date4));
+        placage.addAll(Ligne2Range(date1, date2, date3, date4));
+        placage.addAll(Derouleuse2Range(date1, date2, date3, date4));
+        placage.addAll(Bobineuse2Range(date1, date2, date3, date4));
+        placage.addAll(MagBob2Range(date1, date2, date3, date4));
+        placage.addAll(MassicotARange(date1, date2, date3, date4));
+        placage.addAll(MassicotBRange(date1, date2, date3, date4));
+        placage.addAll(Ligne3Range(date1, date2, date3, date4));
+        placage.addAll(Derouleuse3Range(date1, date2, date3, date4));
+        placage.addAll(Bobineuse3Range(date1, date2, date3, date4));
+        placage.addAll(MagBob3Range(date1, date2, date3, date4));
+        placage.addAll(MassicotEZ3Range(date1, date2, date3, date4));
+        placage.addAll(MassicotEZ4Range(date1, date2, date3, date4));
+        placage.addAll(SechoirsRange(date1, date2, date3, date4));
+        placage.addAll(SechoirENRange(date1, date2, date3, date4));
+        placage.addAll(SechoirEZ1Range(date1, date2, date3, date4));
+        placage.addAll(SechoirEZ2Range(date1, date2, date3, date4));
+        placage.addAll(SechoirEZ3Range(date1, date2, date3, date4));
+        placage.addAll(SechoirEZ4Range(date1, date2, date3, date4));
+        placage.addAll(SechoirER24Range(date1, date2, date3, date4));
+        return placage;
+    }
+    
+    
     @GetMapping("/ridotto/placage")
     public List<JSONObject> RapportPlacage(){
         List<JSONObject> placage = new ArrayList<>();
@@ -7814,6 +7911,41 @@ public class RapportController {
         return MTBF2;
     }
     
+    @GetMapping("/ridottos/brazil")
+    public List<JSONObject> RapportBrazils(){
+        List<JSONObject> brazil = new ArrayList<>();
+        brazil.addAll(Brazil());
+        brazil.addAll(EncollageBrazil());
+        brazil.addAll(Encolleuse1Brazil());
+        brazil.addAll(Encolleuse2Brazil());
+        brazil.addAll(Encolleuse3Brazil());
+        brazil.addAll(ScieBongioanni());
+        brazil.addAll(PresseTete());
+        brazil.addAll(Tranchage());
+        brazil.addAll(Trancheuse1());
+        brazil.addAll(Trancheuse2());
+        return brazil;        
+    }
+    
+    @GetMapping("/ridottos/brazilRange")
+    public List<JSONObject> RapportBrazilRanges(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
+        List<JSONObject> brazil = new ArrayList<>();
+        brazil.addAll(BrazilRange(date1, date2, date3, date4));
+        brazil.addAll(EncollageBrazilRange(date1, date2, date3, date4));
+        brazil.addAll(Encolleuse1BrazilRange(date1, date2, date3, date4));
+        brazil.addAll(Encolleuse2BrazilRange(date1, date2, date3, date4));
+        brazil.addAll(Encolleuse3BrazilRange(date1, date2, date3, date4));
+        brazil.addAll(ScieBongioanniRange(date1, date2, date3, date4));
+        brazil.addAll(PresseTeteRange(date1, date2, date3, date4));
+        brazil.addAll(TranchageRange(date1, date2, date3, date4));
+        brazil.addAll(Trancheuse1Range(date1, date2, date3, date4));
+        brazil.addAll(Trancheuse2Range(date1, date2, date3, date4));
+        return brazil;        
+    }
+    
     @GetMapping("/ridotto/brazil")
     public List<JSONObject> RapportBrazil(){
         List<JSONObject> brazil = new ArrayList<>();
@@ -8598,6 +8730,32 @@ public class RapportController {
         return MTBF2;
     }
     
+    @GetMapping("/ridottos/contreplaque")
+    public List<JSONObject> RapportContreplaques(){
+        List<JSONObject> cp = new ArrayList<>();
+        cp.addAll(Contreplaque());
+        cp.addAll(PresseSimi());
+        cp.addAll(Encolleuse1CP());
+        cp.addAll(Encolleuse2CP());
+        cp.addAll(Encolleuse3CP());
+        return cp;        
+    }
+    
+    @GetMapping("/ridottos/contreplaqueRange")
+    public List<JSONObject> RapportContreplaqueRanges(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
+        List<JSONObject> cp = new ArrayList<>();
+        cp.addAll(ContreplaqueRange(date1, date2, date3, date4));
+        cp.addAll(PresseSimiRange(date1, date2, date3, date4));
+        cp.addAll(Encolleuse1CPRange(date1, date2, date3, date4));
+        cp.addAll(Encolleuse2CPRange(date1, date2, date3, date4));
+        cp.addAll(Encolleuse3CPRange(date1, date2, date3, date4));
+        return cp;        
+    }
+    
+    
     @GetMapping("/ridotto/contreplaque")
     public List<JSONObject> RapportContreplaque(){
         List<JSONObject> cp = new ArrayList<>();
@@ -8632,6 +8790,23 @@ public class RapportController {
     
     @GetMapping("/ridotto/scierieRange")
     public List<JSONObject> RapportScierie(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
+        List<JSONObject> scierie = new ArrayList<>();
+        scierie.addAll(ScierieRange(date1, date2, date3, date4));
+        return scierie;        
+    }
+    
+    @GetMapping("/ridottos/scierie")
+    public List<JSONObject> RapportScieries(){
+        List<JSONObject> scierie = new ArrayList<>();
+        scierie.addAll(Scierie());
+        return scierie;        
+    }
+    
+    @GetMapping("/ridottos/scierieRange")
+    public List<JSONObject> RapportScieries(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut1") LocalDate date1, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin1") LocalDate date2, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("debut2") LocalDate date3, 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam("fin2") LocalDate date4){
