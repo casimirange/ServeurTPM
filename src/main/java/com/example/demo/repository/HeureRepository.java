@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 @Repository
 public interface HeureRepository extends JpaRepository<Heures, Long>{
 
-    String hourMonth = "SELECT h.date as date, m.nom as machine, m.code, h.heure,\n" +
+    String hourMonth = "SELECT h.id_heure as idHeure,  h.date as date, m.nom as machine, m.code, h.heure,\n" +
         "count(a.numero) as nbre,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
         "from heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
@@ -23,7 +23,7 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
     @Query(value=hourMonth, nativeQuery = true)
     public List<JSONObject> HeuresMonth(String month);
 
-    String hourRange = "SELECT h.date as date, m.nom as machine, m.code, h.heure,\n" +
+    String hourRange = "SELECT h.id_heure as idHeure,  h.date as date, m.nom as machine, m.code, h.heure,\n" +
         "count(a.numero) as nbre,\n" +
         "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
         "from heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
