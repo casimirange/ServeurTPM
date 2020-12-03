@@ -10516,7 +10516,7 @@ public class AlpicamController {
         int year = cal.get(Calendar.YEAR);
         date1 = LocalDate.of(year-1, Month.JANUARY, 01);
         System.out.println("date1:\n" + date1);
-        date2 = LocalDate.now();
+        date2 = LocalDate.now().minusYears(1);
         
         List<JSONObject> MTBF = new ArrayList<>();
         List<JSONObject> MTBF2 = new ArrayList<>();
