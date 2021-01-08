@@ -22,6 +22,7 @@ public class CORSFilter implements Filter {
 
     @Value("${permitted-url}")
     private String permittedUrl = "";
+    
 	@Override
  	public void init(FilterConfig fc) throws ServletException{
 		
