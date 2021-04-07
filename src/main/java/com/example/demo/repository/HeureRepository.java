@@ -48,9 +48,10 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
     public List<JSONObject> HeuresByDepMachine(LocalDate date, String dep);
 
     String hourbydepMachineMonth = "SELECT h.date as date, m.nom, m.code, m.etat, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
-        "count(a.numero) as nbre,\n" +
-        "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
-        "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
+//        "count(a.numero) as nbre,\n" +
+//        "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
+//        "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
+        "from  heures h\n" +
         "join machines m on (m.id_machine = h.id_machine and m.localisation like 'bonab%')\n" +
         "join lignes l on l.id_ligne = m.id_ligne\n" +
         "join departement d on d.id_departement = l.id_departement\n" +
