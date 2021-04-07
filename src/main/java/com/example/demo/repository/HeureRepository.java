@@ -47,7 +47,7 @@ public interface HeureRepository extends JpaRepository<Heures, Long>{
     @Query(value=hourbydepMachine, nativeQuery = true)
     public List<JSONObject> HeuresByDepMachine(LocalDate date, String dep);
 
-    String hourbydepMachineMonth = "SELECT h.date as date, m.nom, m.code, m.etat, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine,\n" +
+    String hourbydepMachineMonth = "SELECT h.date as date, m.nom, m.code, m.etat, sum(h.heure) as heure, d.nom as dep, count(DISTINCT m.nom) as nombre_machine \n" +
 //        "count(a.numero) as nbre,\n" +
 //        "COALESCE(sum(DISTINCT timestampdiff(minute, a.debut_arret, a.fin_arret)),0) as AT\n" +
 //        "from  heures h LEFT OUTER JOIN arrets a on (a.date = h.date AND a.id_machine = h.id_machine)\n" +
