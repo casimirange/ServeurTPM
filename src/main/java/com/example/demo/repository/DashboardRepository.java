@@ -199,7 +199,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "count(DISTINCT p.numero) as nbre " +
             "from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%Y') = date_format(h.date, '%Y')) \n" +
             "join machines m on (m.id_machine = p.id_machine and m.localisation like 'bonab%' and m.label like 'corre%') "
-            + "where date_format(h.date, '%Y') between '2012' and '2017' " +
+            + "where date_format(h.date, '%Y') between '2012' and '2015' " +
             "GROUP by date_format(h.date, '%Y'), p.numero";
 
     @Query(value = pByYear1, nativeQuery = true)
@@ -212,7 +212,7 @@ public interface DashboardRepository extends JpaRepository<Pannes, Long> {
             + "count(DISTINCT p.numero) as nbre " +
             "from  heures h LEFT OUTER JOIN pannes p on (date_format(p.date, '%Y') = date_format(h.date, '%Y')) \n" +
             "join machines m on (m.id_machine = p.id_machine and m.localisation like 'bonab%' and m.label like 'corre%') "
-            + "where date_format(h.date, '%Y') between '2018' and ?1 " +
+            + "where date_format(h.date, '%Y') between '2016' and ?1 " +
             "GROUP by date_format(h.date, '%Y'), p.numero";
 
     @Query(value = pByYear2, nativeQuery = true)
