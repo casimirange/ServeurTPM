@@ -114,15 +114,39 @@ public class AuthRestApi {
  
         break;
       case "pm":
-        Roles pmRole = roleRepository.findByName(RoleName.ROLE_PM)
+        Roles pmRole = roleRepository.findByName(RoleName.ROLE_RESP_MAINTENANCE)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(pmRole);
  
         break;  
-      case "responsable":
-        Roles responsableRole = roleRepository.findByName(RoleName.ROLE_RESPONSABLE)
+      case "respPL":
+        Roles respPLRole = roleRepository.findByName(RoleName.ROLE_RESP_PLACAGE)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-        roles.add(responsableRole);
+        roles.add(respPLRole);
+ 
+        break;
+      case "respCP":
+        Roles respCPRole = roleRepository.findByName(RoleName.ROLE_RESP_CP)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respCPRole);
+ 
+        break;
+      case "respScierie":
+        Roles respScierieRole = roleRepository.findByName(RoleName.ROLE_RESP_SCIERIE)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respScierieRole);
+ 
+        break;
+      case "respBRAZIL":
+        Roles respBraRole = roleRepository.findByName(RoleName.ROLE_RESP_BRAZIL)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respBraRole);
+ 
+        break;
+      case "respMIND":
+        Roles respMINDRole = roleRepository.findByName(RoleName.ROLE_RESP_MINDOUROU)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respMINDRole);
  
         break;
       case "super_admin":
@@ -131,8 +155,14 @@ public class AuthRestApi {
         roles.add(super_adminRole);
  
         break;
+      case "userMIND":
+        Roles userMindRole = roleRepository.findByName(RoleName.ROLE_USER_MINDOUROU)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(userMindRole);
+ 
+        break;
       default:
-        Roles userRole = roleRepository.findByName(RoleName.ROLE_USER)
+        Roles userRole = roleRepository.findByName(RoleName.ROLE_USER_ALPI)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(userRole);
       }
@@ -146,19 +176,7 @@ public class AuthRestApi {
  
   @PutMapping("/{id}")
   public ResponseEntity<?> updateUser(@Valid @RequestBody SignUpForm signUpRequest, @PathVariable Long id) {
-//    if (utilisateurRepository.existsByUsername(signUpRequest.getUsername())) {
-//      return new ResponseEntity<>(new ResponseMessage("Fail -> Username is already taken!"),
-//              HttpStatus.BAD_REQUEST);
-//    }
-// 
-//    if (utilisateurRepository.existsByEmail(signUpRequest.getEmail())) {
-//      return new ResponseEntity<>(new ResponseMessage("Fail -> Email is already in use!"),
-//          HttpStatus.BAD_REQUEST);
-//    }
- 
-    // Creating user's account
-//      User user = new User(signUpRequest.getName(), signUpRequest.getUsername(), signUpRequest.getEmail(),
-//        encoder.encode(signUpRequest.getPassword()));
+
       User user1 = utilisateurRepository.findById(id).get();
       user1.setEmail(signUpRequest.getEmail());
       user1.setName(signUpRequest.getName());
@@ -179,16 +197,40 @@ public class AuthRestApi {
         roles.add(adminRole);
  
         break;
-      case "pm":
-        Roles pmRole = roleRepository.findByName(RoleName.ROLE_PM)
+      case "respMaint":
+        Roles pmRole = roleRepository.findByName(RoleName.ROLE_RESP_MAINTENANCE)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(pmRole);
  
         break;  
-      case "responsable":
-        Roles responsableRole = roleRepository.findByName(RoleName.ROLE_RESPONSABLE)
+      case "respPL":
+        Roles respPLRole = roleRepository.findByName(RoleName.ROLE_RESP_PLACAGE)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-        roles.add(responsableRole);
+        roles.add(respPLRole);
+ 
+        break;
+      case "respCP":
+        Roles respCPRole = roleRepository.findByName(RoleName.ROLE_RESP_CP)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respCPRole);
+ 
+        break;
+      case "respSC":
+        Roles respScierieRole = roleRepository.findByName(RoleName.ROLE_RESP_SCIERIE)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respScierieRole);
+ 
+        break;
+      case "respBRA":
+        Roles respBraRole = roleRepository.findByName(RoleName.ROLE_RESP_BRAZIL)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respBraRole);
+ 
+        break;
+      case "respMIND":
+        Roles respMINDRole = roleRepository.findByName(RoleName.ROLE_RESP_MINDOUROU)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(respMINDRole);
  
         break;
       case "super_admin":
@@ -197,8 +239,14 @@ public class AuthRestApi {
         roles.add(super_adminRole);
  
         break;
+      case "userMIND":
+        Roles userMindRole = roleRepository.findByName(RoleName.ROLE_USER_MINDOUROU)
+            .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+        roles.add(userMindRole);
+ 
+        break;
       default:
-        Roles userRole = roleRepository.findByName(RoleName.ROLE_USER)
+        Roles userRole = roleRepository.findByName(RoleName.ROLE_USER_ALPI)
             .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(userRole);
       }

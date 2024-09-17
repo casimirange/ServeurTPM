@@ -27,10 +27,10 @@ public class JwtProvider {
  
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
  
-    @Value("${casimirange.app.jwtSecret}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
  
-    @Value("${casimirange.app.jwtExpiration}")
+    @Value("${jwt.expiration}")
     private int jwtExpiration;
  
     public String generateJwtToken(Authentication authentication) {
